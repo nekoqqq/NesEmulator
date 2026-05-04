@@ -16,19 +16,19 @@ using std::ostream;
 class CPU
 {
 public:
-    CPU(byte programe_counter = 0, byte stack_pointer = 0, byte register_a = 0, byte register_x = 0, byte register_y = 0, byte status = 0);
+    CPU(byte program_counter = 0, byte stack_pointer = 0, byte register_a = 0, byte register_x = 0, byte register_y = 0, byte status = 0);
 
-    void interpret(vector<byte>& program);
+    void interpret(program& prog);
 
     byte mem_read(uint16_t addr) const;
 
     void mem_write(uint16_t addr, byte data);
 
     // 将ROM加载到内存中
-    void load(vector<byte>& program);
+    void load(program& prog);
 
     // 加载ROM并运行程序
-    void load_and_run(vector<byte>& program);
+    void load_and_run(program& prog);
 
     // 给一个16位的地址，需要读取连续两个字节的数据，也就是连续两行的数据，这两行的数据再根据小端的方式拼接
     uint16_t mem_read_u16(uint16_t pos) const;
@@ -48,13 +48,13 @@ protected:
 
     friend ostream& operator<<(ostream& out, CPU* cpu);
 
-    bool brk(vector<byte>& program);
-    bool lda(vector<byte>& program);
+    bool brk(program& prog);
+    bool lda(program& prog);
     bool lda(AddressingMode mode);
     bool sta(AddressingMode mode);
-    bool tax(vector<byte>& program);
-    bool inx(vector<byte>& program);
-    bool iny(vector<byte>& program);
+    bool tax(program& prog);
+    bool inx(program& prog);
+    bool iny(program& prog);
     bool adc(AddressingMode mode);
     bool sbc(AddressingMode mode);
     bool op_and(AddressingMode mode);

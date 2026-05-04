@@ -2,7 +2,7 @@
 #include "../public/op_code.h"
 
 
-CPU::CPU(byte programe_counter, byte stack_pointer, byte register_a, byte register_x, byte register_y, byte status) : program_counter(programe_counter),
+CPU::CPU(byte program_counter, byte stack_pointer, byte register_a, byte register_x, byte register_y, byte status) : program_counter(program_counter),
                                                                                                                       stack_pointer(stack_pointer), register_a(register_a),
                                                                                                                       register_x(register_x), register_y(register_y), status(status)
 {

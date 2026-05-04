@@ -1,6 +1,10 @@
 ﻿#pragma once
 
+#include <vector>
+using std::vector;
+
 using byte = unsigned char;
+using program = vector<byte>;
 
 // 寻址方式
 enum AddressingMode:byte
