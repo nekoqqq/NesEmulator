@@ -15,66 +15,36 @@ using std::ostream;
 
 class CPU
 {
+    friend struct OpCode;
+
 public:
     CPU(byte program_counter = 0, byte stack_pointer = 0, byte register_a = 0, byte register_x = 0, byte register_y = 0, byte status = 0);
 
-    void interpret(program& prog);
-
-    byte mem_read(uint16_t addr) const;
-
-    void mem_write(uint16_t addr, byte data);
-
-    // 将ROM加载到内存中
-    void load(program& prog);
-
     // 加载ROM并运行程序
     void load_and_run(program& prog);
-
+    // 不清空直接运行
+    void load_and_run_no_reset(program& prog);
+    
+    byte mem_read(uint16_t addr) const;
+    void mem_write(uint16_t addr, byte data);
     // 给一个16位的地址，需要读取连续两个字节的数据，也就是连续两行的数据，这两行的数据再根据小端的方式拼接
     uint16_t mem_read_u16(uint16_t pos) const;
-
     // 给一个16位的地址，写入一个16位的操作数，用小端的方式，先写低八位的数据，再写高8位的数据
     // 记住，内存总共64KB大小，总共有64K行，每行都是8位，存一个Byte，数据就存在这些cell里面
     void mem_write_u16(uint16_t pos, uint16_t data);
 
-    // 重置寄存器的状态，将program_counter的值设置为在内存0xFFFC处存储的2个字节的值
-    void reset();
-
-    void run();
-
 protected:
     // 输出的处理函数
-    friend ostream& operator<<(ostream& out, CPU& cpu);
-
     friend ostream& operator<<(ostream& out, CPU* cpu);
 
-    bool brk(program& prog, AddressingMode mode);
-    bool lda(program& prog, AddressingMode mode);
-    bool sta(program& prog, AddressingMode mode);
-    bool tax(program& prog, AddressingMode mode);
-    bool inx(program& prog, AddressingMode mode);
-    bool iny(program& prog, AddressingMode mode);
-    bool adc(program& prog, AddressingMode mode);
-    bool sbc(program& prog, AddressingMode mode);
-    bool op_and(program& prog, AddressingMode mode);
-    bool op_eor(program& prog, AddressingMode mode);
-    bool op_ora(program& prog, AddressingMode mode);
-    bool asl(program& prog, AddressingMode mode);
-    bool asr(program& prog, AddressingMode mode);
-    bool bcc(program& prog, AddressingMode mode);
-    bool bcs(program& prog, AddressingMode mode);
-
-    // Branch On Equal
-    bool beq(program& prog, AddressingMode mode);
-
-    // Branch On Not Equal
-    bool bne(program& prog, AddressingMode mode);
-    bool bpl(program& prog, AddressingMode mode);
-    bool bmi(program& prog, AddressingMode mode);
-    bool bvc(program& prog, AddressingMode mode);
-    bool bvs(program& prog, AddressingMode mode);
-
 private:
+    bool interpret(); // 单步执行指令
+    // 将ROM加载到内存中
+    void load(program& prog);
+    // 重置寄存器的状态，将program_counter的值设置为在内存0xFFFC处存储的2个字节的值
+    void reset();
+    // 运行内存中的程序
+    void run(); 
     // 通用的设置寄存器的函数
     void update_zero_and_negative_flags(byte res);
     uint16_t get_operand_address(AddressingMode& mode) const;
