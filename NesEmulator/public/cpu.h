@@ -48,32 +48,31 @@ protected:
 
     friend ostream& operator<<(ostream& out, CPU* cpu);
 
-    bool brk(program& prog);
-    bool lda(program& prog);
-    bool lda(AddressingMode mode);
-    bool sta(AddressingMode mode);
-    bool tax(program& prog);
-    bool inx(program& prog);
-    bool iny(program& prog);
-    bool adc(AddressingMode mode);
-    bool sbc(AddressingMode mode);
-    bool op_and(AddressingMode mode);
-    bool op_eor(AddressingMode mode);
-    bool op_ora(AddressingMode mode);
-    bool asl(AddressingMode mode);
-    bool asr(AddressingMode mode);
-    bool bcc(AddressingMode mode);
-    bool bcs(AddressingMode mode);
+    bool brk(program& prog, AddressingMode mode);
+    bool lda(program& prog, AddressingMode mode);
+    bool sta(program& prog, AddressingMode mode);
+    bool tax(program& prog, AddressingMode mode);
+    bool inx(program& prog, AddressingMode mode);
+    bool iny(program& prog, AddressingMode mode);
+    bool adc(program& prog, AddressingMode mode);
+    bool sbc(program& prog, AddressingMode mode);
+    bool op_and(program& prog, AddressingMode mode);
+    bool op_eor(program& prog, AddressingMode mode);
+    bool op_ora(program& prog, AddressingMode mode);
+    bool asl(program& prog, AddressingMode mode);
+    bool asr(program& prog, AddressingMode mode);
+    bool bcc(program& prog, AddressingMode mode);
+    bool bcs(program& prog, AddressingMode mode);
 
     // Branch On Equal
-    bool beq(AddressingMode);
+    bool beq(program& prog, AddressingMode mode);
 
     // Branch On Not Equal
-    bool bne(AddressingMode);
-    bool bpl(AddressingMode);
-    bool bmi(AddressingMode);
-    bool bvc(AddressingMode);
-    bool bvs(AddressingMode);
+    bool bne(program& prog, AddressingMode mode);
+    bool bpl(program& prog, AddressingMode mode);
+    bool bmi(program& prog, AddressingMode mode);
+    bool bvc(program& prog, AddressingMode mode);
+    bool bvs(program& prog, AddressingMode mode);
 
 private:
     // 通用的设置寄存器的函数

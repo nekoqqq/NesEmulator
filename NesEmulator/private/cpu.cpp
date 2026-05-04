@@ -3,8 +3,8 @@
 
 
 CPU::CPU(byte program_counter, byte stack_pointer, byte register_a, byte register_x, byte register_y, byte status) : program_counter(program_counter),
-                                                                                                                      stack_pointer(stack_pointer), register_a(register_a),
-                                                                                                                      register_x(register_x), register_y(register_y), status(status)
+                                                                                                                     stack_pointer(stack_pointer), register_a(register_a),
+                                                                                                                     register_x(register_x), register_y(register_y), status(status)
 {
 }
 
@@ -18,25 +18,25 @@ void CPU::interpret(vector<byte>& program)
         switch (opscode)
         {
         // LDA Immediate
-        case 0xA9: lda(program);
+        case 0xA9: lda(program, Immediate);
             break;
 
         // TAX Immediate
-        case 0xAA: tax(program);
+        case 0xAA: tax(program, NoneAddressing);
             break;
 
-        case 0xE8: inx(program);
+        case 0xE8: inx(program, NoneAddressing);
             break;
 
 
         case 0xC8:
-            iny(program);
+            iny(program, NoneAddressing);
             break;
 
         // BRK 
         case 0x00:
             {
-                brk(program);
+                brk(program, NoneAddressing);
                 return;
                 break;
             }
@@ -109,7 +109,7 @@ void CPU::run()
         OpCode op_code = OpCode::OPCODES_MAP.at(code);
 
 
-        vector<byte> program;
+        program prog;
         switch (code)
         {
         // LDA
@@ -120,7 +120,7 @@ void CPU::run()
         case 0xbd:
         case 0xb9:
         case 0xa1:
-        case 0xb1: lda(op_code.mode);
+        case 0xb1: lda(prog, op_code.mode);
             break;
 
         // STA
@@ -130,7 +130,7 @@ void CPU::run()
         case 0x9d:
         case 0x99:
         case 0x81:
-        case 0x91: sta(op_code.mode);
+        case 0x91: sta(prog, op_code.mode);
             break;
 
 
@@ -142,7 +142,7 @@ void CPU::run()
         case 0x7d:
         case 0x79:
         case 0x61:
-        case 0x71: adc(op_code.mode);
+        case 0x71: adc(prog, op_code.mode);
             break;
 
         // SBC
@@ -153,7 +153,7 @@ void CPU::run()
         case 0xfd:
         case 0xf9:
         case 0xe1:
-        case 0xf1: sbc(op_code.mode);
+        case 0xf1: sbc(prog, op_code.mode);
             break;
 
         // AND
@@ -164,7 +164,7 @@ void CPU::run()
         case 0x3d:
         case 0x39:
         case 0x21:
-        case 0x31: op_and(op_code.mode);
+        case 0x31: op_and(prog, op_code.mode);
             break;
 
         // EOR
@@ -175,7 +175,7 @@ void CPU::run()
         case 0x5d:
         case 0x59:
         case 0x41:
-        case 0x51: op_eor(op_code.mode);
+        case 0x51: op_eor(prog, op_code.mode);
             break;
 
         // ORA
@@ -186,7 +186,7 @@ void CPU::run()
         case 0x1d:
         case 0x19:
         case 0x01:
-        case 0x11: op_ora(op_code.mode);
+        case 0x11: op_ora(prog, op_code.mode);
             break;
 
         // ASL
@@ -194,53 +194,53 @@ void CPU::run()
         case 0x06:
         case 0x16:
         case 0x0e:
-        case 0x1e: asl(op_code.mode);
+        case 0x1e: asl(prog, op_code.mode);
             break;
 
 
         // Branch Family
         // BPL
-        case 0x10: bpl(op_code.mode);
+        case 0x10: bpl(prog, op_code.mode);
             break;
         // BMI
-        case 0x30: bmi(op_code.mode);
+        case 0x30: bmi(prog, op_code.mode);
             break;
         // BVC
-        case 0x50: bvc(op_code.mode);
+        case 0x50: bvc(prog, op_code.mode);
             break;
         // BVS
-        case 0x70: bvc(op_code.mode);
+        case 0x70: bvc(prog, op_code.mode);
             break;
         // BCC
-        case 0x90: bcc(op_code.mode);
+        case 0x90: bcc(prog, op_code.mode);
             break;
         // BCS
-        case 0xB0: bcs(op_code.mode);
+        case 0xB0: bcs(prog, op_code.mode);
             break;
         // BNE
-        case 0xD0: bne(op_code.mode);
+        case 0xD0: bne(prog, op_code.mode);
             break;
         // BEQ
-        case 0xF0: beq(op_code.mode);
+        case 0xF0: beq(prog, op_code.mode);
             break;
 
 
         // TAX
-        case 0xaa: tax(program);
+        case 0xaa: tax(prog, op_code.mode);
             break;
 
         // INX
-        case 0xe8: inx(program);
+        case 0xe8: inx(prog, op_code.mode);
             break;
 
         // INY
-        case 0xC8: iny(program);
+        case 0xC8: iny(prog, op_code.mode);
             break;
 
         // BRK 
         case 0x00:
             {
-                brk(program);
+                brk(prog, op_code.mode);
                 return;
                 break;
             }
@@ -256,38 +256,40 @@ void CPU::run()
     }
 }
 
-bool CPU::brk(vector<byte>& program)
+bool CPU::brk(program& prog, AddressingMode mode)
 {
     std::printf("halt\n");
     return true;
 }
 
-bool CPU::lda(vector<byte>& program)
+bool CPU::lda(program& prog, AddressingMode mode)
 {
-    register_a = program[program_counter++];
-    update_zero_and_negative_flags(register_a);
+    if (mode == Immediate)
+    {
+        register_a = prog[program_counter++];
+        update_zero_and_negative_flags(register_a);
 
-    return true;
+        return true;
+    }
+    else
+    {
+        uint16_t addr = get_operand_address(mode);
+        byte value = mem_read(addr);
+
+        register_a = value;
+        update_zero_and_negative_flags(register_a);
+        return true;
+    }
 }
 
-bool CPU::lda(AddressingMode mode)
-{
-    uint16_t addr = get_operand_address(mode);
-    byte value = mem_read(addr);
-
-    register_a = value;
-    update_zero_and_negative_flags(register_a);
-    return true;
-}
-
-bool CPU::sta(AddressingMode mode)
+bool CPU::sta(program& prog, AddressingMode mode)
 {
     uint16_t addr = get_operand_address(mode);
     mem_write(addr, register_a);
     return true;
 }
 
-bool CPU::tax(vector<byte>& program)
+bool CPU::tax(program& prog, AddressingMode mode)
 {
     register_x = register_a;
     update_zero_and_negative_flags(register_x);
@@ -295,7 +297,7 @@ bool CPU::tax(vector<byte>& program)
     return true;
 }
 
-bool CPU::inx(vector<byte>& program)
+bool CPU::inx(program& prog, AddressingMode mode)
 {
     register_x += 1;
     update_zero_and_negative_flags(register_x);
@@ -303,7 +305,7 @@ bool CPU::inx(vector<byte>& program)
     return true;
 }
 
-bool CPU::iny(vector<byte>& program)
+bool CPU::iny(program& prog, AddressingMode mode)
 {
     register_y += 1;
     update_zero_and_negative_flags(register_y);
@@ -311,7 +313,7 @@ bool CPU::iny(vector<byte>& program)
     return true;
 }
 
-bool CPU::adc(AddressingMode mode)
+bool CPU::adc(program& prog, AddressingMode mode)
 {
     // adc(y) 定义为x+y+c
     uint16_t address = get_operand_address(mode);
@@ -322,7 +324,7 @@ bool CPU::adc(AddressingMode mode)
     return true;
 }
 
-bool CPU::sbc(AddressingMode mode)
+bool CPU::sbc(program& prog, AddressingMode mode)
 {
     uint16_t address = get_operand_address(mode);
     byte value = mem_read(address);
@@ -337,7 +339,7 @@ bool CPU::sbc(AddressingMode mode)
     return true;
 }
 
-bool CPU::op_and(AddressingMode mode)
+bool CPU::op_and(program& prog, AddressingMode mode)
 {
     uint16_t addr = get_operand_address(mode);
     byte data = mem_read(addr);
@@ -346,7 +348,7 @@ bool CPU::op_and(AddressingMode mode)
     return true;
 }
 
-bool CPU::op_eor(AddressingMode mode)
+bool CPU::op_eor(program& prog, AddressingMode mode)
 {
     uint16_t addr = get_operand_address(mode);
     byte data = mem_read(addr);
@@ -355,7 +357,7 @@ bool CPU::op_eor(AddressingMode mode)
     return true;
 }
 
-bool CPU::op_ora(AddressingMode mode)
+bool CPU::op_ora(program& prog, AddressingMode mode)
 {
     uint16_t addr = get_operand_address(mode);
     byte data = mem_read(addr);
@@ -364,7 +366,7 @@ bool CPU::op_ora(AddressingMode mode)
     return true;
 }
 
-bool CPU::asl(AddressingMode mode)
+bool CPU::asl(program& prog, AddressingMode mode)
 {
     uint16_t addr = get_operand_address(mode);
     byte data = mem_read(addr);
@@ -386,7 +388,7 @@ bool CPU::asl(AddressingMode mode)
     return true;
 }
 
-bool CPU::asr(AddressingMode mode)
+bool CPU::asr(program& prog, AddressingMode mode)
 {
     uint16_t addr = get_operand_address(mode);
     byte data = mem_read(addr);
@@ -408,7 +410,7 @@ bool CPU::asr(AddressingMode mode)
     return true;
 }
 
-bool CPU::bcc(AddressingMode mode)
+bool CPU::bcc(program& prog, AddressingMode mode)
 {
     // if carry clear
     if ((status & 1 << 0) == 0)
@@ -420,7 +422,7 @@ bool CPU::bcc(AddressingMode mode)
     return true;
 }
 
-bool CPU::bcs(AddressingMode mode)
+bool CPU::bcs(program& prog, AddressingMode mode)
 {
     // if carry clear
     if ((status & 1 << 0) == 1)
@@ -432,7 +434,7 @@ bool CPU::bcs(AddressingMode mode)
     return true;
 }
 
-bool CPU::beq(AddressingMode)
+bool CPU::beq(program& prog, AddressingMode mode)
 {
     // if zero clear
     if ((status & 1 << 1) == 0)
@@ -444,7 +446,7 @@ bool CPU::beq(AddressingMode)
     return true;
 }
 
-bool CPU::bne(AddressingMode)
+bool CPU::bne(program& prog, AddressingMode mode)
 {
     // if zero set
     if ((status & 1 << 1) == 1)
@@ -456,7 +458,7 @@ bool CPU::bne(AddressingMode)
     return true;
 }
 
-bool CPU::bpl(AddressingMode)
+bool CPU::bpl(program& prog, AddressingMode mode)
 {
     if ((status & 1 << 7) == 0)
     {
@@ -467,7 +469,7 @@ bool CPU::bpl(AddressingMode)
     return true;
 }
 
-bool CPU::bmi(AddressingMode)
+bool CPU::bmi(program& prog, AddressingMode mode)
 {
     if ((status & 1 << 7) == 1)
     {
@@ -478,7 +480,7 @@ bool CPU::bmi(AddressingMode)
     return true;
 }
 
-bool CPU::bvc(AddressingMode)
+bool CPU::bvc(program& prog, AddressingMode mode)
 {
     if ((status & 1 << 6) == 0)
     {
@@ -489,7 +491,7 @@ bool CPU::bvc(AddressingMode)
     return true;
 }
 
-bool CPU::bvs(AddressingMode)
+bool CPU::bvs(program& prog, AddressingMode mode)
 {
     if ((status & 1 << 6) == 1)
     {
@@ -680,7 +682,7 @@ ostream& operator<<(ostream& out, CPU* cpu)
     };
     for (int i = res.size() - 1; i >= 0; i--)
     {
-        std::printf("%c:%d ",status_ch_map[i],res[i]);
+        std::printf("%c:%d ", status_ch_map[i], res[i]);
     }
 
     return out;
