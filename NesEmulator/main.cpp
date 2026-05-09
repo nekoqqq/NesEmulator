@@ -17,6 +17,8 @@ void test_bvc();
 void test_bvs();
 void test_clc();
 void test_cld();
+void test_cli();
+void test_clv();
 
 int main()
 {
@@ -36,5 +38,6 @@ int main()
     test_clc();
     // todo: 增加op码和助记符的测试文件
     test_cld();
-    
+    test_cli();
+    test_clv();
 }

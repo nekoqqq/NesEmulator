@@ -158,7 +158,13 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0x18, "CLC", 1, 2, Implied, &clc),
 
         // CLD - Clear Decimal Mode
-        OpCode(0xD8, "CLD", 1, 2, Implied, &cld)
+        OpCode(0xD8, "CLD", 1, 2, Implied, &cld),
+
+        // CLI - Clear Interrupt Disable
+        OpCode(0x58, "CLI", 1, 2, Implied, &cli),
+
+        // CLV - Clear Overflow Flag
+        OpCode(0xB8, "CLV", 1, 2, Implied, &clv)
 
     };
     return cpu_ops_code;
@@ -478,5 +484,17 @@ bool OpCode::clc(CPU& cpu, AddressingMode mode)
 bool OpCode::cld(CPU& cpu, AddressingMode mode)
 {
     cpu.SetFlag(CPU::DECIMAL_FLAG, false);
+    return true;
+}
+
+bool OpCode::cli(CPU& cpu, AddressingMode mode)
+{
+    cpu.SetFlag(CPU::INTERRUPT_FLAG, false);
+    return true;
+}
+
+bool OpCode::clv(CPU& cpu, AddressingMode mode)
+{
+    cpu.SetFlag(CPU::OVERFLOW_FLAG, false);
     return true;
 }
