@@ -12,10 +12,12 @@ using std::endl;
 void test_asl();
 void test_adc();
 void test_and();
+void test_bcc();
 
 int main()
 {
     test_adc();
     test_asl();
     test_and();
+    test_bcc();
 }

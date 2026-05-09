@@ -16,6 +16,7 @@ enum AddressingMode:byte
     ZeroPage,
     ZeroPage_X,
     ZeroPage_Y,
+    Relative, // 分支指令的寻址方式，实际取数的时候没有用到
     Absolute,
     Absolute_X,
     Absolute_Y,
