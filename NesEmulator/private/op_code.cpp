@@ -177,9 +177,26 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0xD1, "CMP", 2, 5, Indirect_D_Y, &cmp), // (+1 if page crossed)
 
         // CPX - Compare X Register
-        OpCode(0xE0, "CPX ", 2, 2, Immediate, &cpx),
-        OpCode(0xE4, "CPX ", 2, 3, ZeroPage, &cpx),
-        OpCode(0xEC, "CPX ", 3, 4, Absolute, &cpx)
+        OpCode(0xE0, "CPX", 2, 2, Immediate, &cpx),
+        OpCode(0xE4, "CPX", 2, 3, ZeroPage, &cpx),
+        OpCode(0xEC, "CPX", 3, 4, Absolute, &cpx),
+
+        // CPY - Compare Y Register
+        OpCode(0xC0, "CPY", 2, 2, Immediate, &cpy),
+        OpCode(0xC4, "CPY", 2, 3, ZeroPage, &cpy),
+        OpCode(0xCC, "CPY", 3, 4, Absolute, &cpy),
+
+        // DEC - Decrement Memory
+        OpCode(0xC6, "DEC", 2, 5, ZeroPage, &dec),
+        OpCode(0xD6, "DEC", 2, 6, ZeroPage_X, &dec),
+        OpCode(0xCE, "DEC", 3, 6, Absolute, &dec),
+        OpCode(0xDE, "DEC", 3, 7, Absolute_X, &dec),
+
+        // DEX - Decrement X Register
+        OpCode(0xCA, "DEX", 2, 5, Implied, &dex),
+
+        // DEX - Decrement Y Register
+        OpCode(0x88, "DEY", 2, 5, Implied, &dey),
 
 
     };
@@ -537,4 +554,37 @@ bool OpCode::cmp(CPU& cpu, AddressingMode mode)
 bool OpCode::cpx(CPU& cpu, AddressingMode mode)
 {
     return cmp_common(cpu, mode, cpu.register_x);
+}
+
+bool OpCode::cpy(CPU& cpu, AddressingMode mode)
+{
+    return cmp_common(cpu, mode, cpu.register_y);
+}
+
+bool OpCode::dec(CPU& cpu, AddressingMode mode)
+{
+    word addr = cpu.get_operand_address(mode);
+    byte data = cpu.mem_read(addr);
+    byte result = data - 1;
+    cpu.mem_write(addr, result);
+    cpu.SetFlag(CPU::ZERO_FLAG, result == 0);
+    cpu.SetFlag(CPU::NEGATIVE_FLAG, result & CPU::NEGATIVE_FLAG);
+
+    return true;
+}
+
+bool OpCode::dex(CPU& cpu, AddressingMode mode)
+{
+    cpu.register_x--;
+    cpu.SetFlag(CPU::ZERO_FLAG, cpu.register_x == 0);
+    cpu.SetFlag(CPU::NEGATIVE_FLAG, cpu.register_x & CPU::NEGATIVE_FLAG);
+    return true;
+}
+
+bool OpCode::dey(CPU& cpu, AddressingMode mode)
+{
+    cpu.register_y--;
+    cpu.SetFlag(CPU::ZERO_FLAG, cpu.register_y == 0);
+    cpu.SetFlag(CPU::NEGATIVE_FLAG, cpu.register_y & CPU::NEGATIVE_FLAG);
+    return true;
 }

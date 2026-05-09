@@ -70,4 +70,8 @@ struct OpCode
     static bool cmp_common(CPU&cpu, AddressingMode mode,byte register_data);
     static bool cmp(CPU& cpu, AddressingMode mode);
     static bool cpx(CPU& cpu, AddressingMode mode);
+    static bool cpy(CPU& cpu, AddressingMode mode);
+    static bool dec(CPU& cpu, AddressingMode mode);
+    static bool dex(CPU& cpu, AddressingMode mode);
+    static bool dey(CPU& cpu, AddressingMode mode);
 };

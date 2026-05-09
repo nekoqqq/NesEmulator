@@ -21,6 +21,10 @@ void test_cli();
 void test_clv();
 void test_cmp();
 void test_cpx();
+void test_cpy();
+void test_dec();
+void test_dex();
+void test_dey();
 
 int main()
 {
@@ -44,4 +48,8 @@ int main()
     test_clv();
     test_cmp();
     test_cpx();
+    test_cpy();
+    test_dec();
+    test_dex();
+    test_dey();
 }
