@@ -46,6 +46,9 @@ void test_ror();
 void test_rti();
 void test_rts();
 void test_sbc();
+void test_sec();
+void test_sed();
+void test_sei();
 
 int main()
 {
@@ -94,4 +97,7 @@ int main()
     test_rti();
     test_rts();
     test_sbc();
+    test_sec();
+    test_sed();
+    test_sei();
 }

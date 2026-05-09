@@ -266,6 +266,15 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         // RTS - Return from Subroutine
         OpCode(0x60, "RTS", 1, 6, Implied, &rts),
 
+        // SEC - Set Carry Flag
+        OpCode(0x38, "SEC", 1, 22, Implied, &sec),
+
+        // SED - Set Decimal Flag
+        OpCode(0xF8, "SED", 1, 2, Implied, &sed),
+
+        // SEI - Set Interrupt Disable
+        OpCode(0x78, "SEI", 1, 2, Implied, &sei),
+
 
     };
     return cpu_ops_code;
@@ -570,8 +579,26 @@ bool OpCode::rts(CPU& cpu, AddressingMode mode)
     byte pc_high = cpu.mem_read(cpu.stack_pointer + 0x0100);
 
     word pc = (pc_high << 8) | pc_low;
-    cpu.program_counter = pc  + 1;
+    cpu.program_counter = pc + 1;
 
+    return true;
+}
+
+bool OpCode::sec(CPU& cpu, AddressingMode mode)
+{
+    cpu.SetFlag(CPU::CARRY_FLAG, true);
+    return true;
+}
+
+bool OpCode::sed(CPU& cpu, AddressingMode mode)
+{
+    cpu.SetFlag(CPU::DECIMAL_FLAG, true);
+    return true;
+}
+
+bool OpCode::sei(CPU& cpu, AddressingMode mode)
+{
+    cpu.SetFlag(CPU::INTERRUPT_FLAG, true);
     return true;
 }
 
