@@ -207,7 +207,12 @@ word CPU::get_operand_address(AddressingMode& mode) const
             address = base + register_y; // 指针偏移
         }
         break;
-
+    case AddressingMode::Indirect:
+        {
+            word base = mem_read_u16(program_counter);
+            address = mem_read(base) | (mem_read(base+1) <<8);
+        }
+        break;
 
     // 先加上X寄存器的值，得到一个地址，再取地址里面保存的两个值，按照小端存储的方式，构成新的地址
     case AddressingMode::Indirect_X:

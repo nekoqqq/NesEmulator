@@ -29,6 +29,7 @@ void test_eor();
 void test_inc();
 void test_inx();
 void test_iny();
+void test_jmp();
 
 int main()
 {
@@ -60,4 +61,5 @@ int main()
     test_inc();
     test_inx();
     test_iny();
+    test_jmp();
 }

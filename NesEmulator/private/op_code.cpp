@@ -204,6 +204,10 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         // INY - Increment Y Register
         OpCode(0xC8, "INY", 1, 2, Implied, &iny),
 
+        // JMP - Jump
+        OpCode(0xC8, "INY", 3, 3, Absolute, &jmp),
+        OpCode(0xC8, "INY", 3, 5, Indirect, &jmp),
+
 
     };
     return cpu_ops_code;
@@ -327,6 +331,14 @@ bool OpCode::iny(CPU& cpu, AddressingMode mode)
 {
     cpu.register_y += 1;
     cpu.update_zero_and_negative_flags(cpu.register_y);
+
+    return true;
+}
+
+bool OpCode::jmp(CPU& cpu, AddressingMode mode)
+{
+    word addr = cpu.get_operand_address(mode);
+    cpu.program_counter = addr;
 
     return true;
 }

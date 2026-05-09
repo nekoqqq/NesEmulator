@@ -20,6 +20,7 @@ enum AddressingMode:byte
     Absolute,
     Absolute_X,
     Absolute_Y,
+    Indirect, // JMP等指令使用
     Indirect_X,
     Indirect_D_Y, // 不是和Indirect,X对应的，而是(Indirect),Y
     NoneAddressing
