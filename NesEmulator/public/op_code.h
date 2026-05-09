@@ -94,5 +94,6 @@ struct OpCode
     static bool ror(CPU&cpu, AddressingMode mode);
     
     static bool rti(CPU&cpu, AddressingMode mode);
+    static bool rts(CPU&cpu, AddressingMode mode);
     
 };

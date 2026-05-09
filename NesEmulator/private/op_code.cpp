@@ -263,6 +263,9 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         // RTI - Return from Interrupt
         OpCode(0x40, "RTI", 1, 6, Implied, &rti),
 
+        // RTS - Return from Subroutine
+        OpCode(0x60, "RTS", 1, 6, Implied, &rts),
+
 
     };
     return cpu_ops_code;
@@ -554,6 +557,20 @@ bool OpCode::rti(CPU& cpu, AddressingMode mode)
     byte pc_high = cpu.mem_read(cpu.stack_pointer + 0x0100);
     word pc = (pc_high << 8) | pc_low;
     cpu.program_counter = pc;
+
+    return true;
+}
+
+bool OpCode::rts(CPU& cpu, AddressingMode mode)
+{
+    cpu.stack_pointer++;
+    byte pc_low = cpu.mem_read(cpu.stack_pointer + 0x0100);
+
+    cpu.stack_pointer++;
+    byte pc_high = cpu.mem_read(cpu.stack_pointer + 0x0100);
+
+    word pc = (pc_high << 8) | pc_low;
+    cpu.program_counter = pc  + 1;
 
     return true;
 }
