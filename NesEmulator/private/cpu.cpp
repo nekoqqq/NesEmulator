@@ -110,7 +110,7 @@ bool CPU::interpret()
 void CPU::load(vector<byte>& program)
 {
     // 从32 KB处开始加载程序,程序计数器也设置为此,ROM加载到此内存里面，并不代表实际就从0x8000开始执行了
-    memcpy(memory + 0x8000, &program[0], program.size() * sizeof(byte));
+    memcpy(memory + 0x8000, program.data(), program.size() * sizeof(byte));
 
     // 在NES插入卡带后，会重置程序状态，并将程序计数器的位置设置为存储在0xFFFC处的值,[X,X,X,X] 也就是最后4个字节
     // 将0xFFFC处存储的值设置为0x8000;
