@@ -255,6 +255,10 @@
     <ClCompile Include="private\tests\test_sty.cpp" />
     <ClCompile Include="private\tests\test_tax.cpp" />
     <ClCompile Include="private\tests\test_tay.cpp" />
+    <ClCompile Include="private\tests\test_tsx.cpp" />
+    <ClCompile Include="private\tests\test_txa.cpp" />
+    <ClCompile Include="private\tests\test_txs.cpp" />
+    <ClCompile Include="private\tests\test_tya.cpp" />
     <ClCompile Include="public\platform_common.h">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>

@@ -97,6 +97,18 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         // TAY - Transfer Accumulator to Y
         OpCode(0xA8, "TAY", 1, 2, Implied, &tay),
 
+        // TSX - Transfer Stack Pointer to X
+        OpCode(0xBA, "TSX", 1, 2, Implied, &tsx),
+
+        // TXA - Transfer X to Accumulator
+        OpCode(0x8A, "TXA", 1, 2, Implied, &txa),
+
+        // TXS - Transfer X to Stack Pointer
+        OpCode(0x9A, "TXA", 1, 2, Implied, &txs),
+
+        // TXS - Transfer Y to Accumulator
+        OpCode(0x98, "TYA", 1, 2, Implied, &tya),
+
         // LDA - Load Accumulator
         OpCode(0xa9, "LDA", 2, 2, Immediate, &lda),
         OpCode(0xa5, "LDA", 2, 3, ZeroPage, &lda),
@@ -392,6 +404,41 @@ bool OpCode::tay(CPU& cpu, AddressingMode mode)
     cpu.register_y = cpu.register_a;
     cpu.update_zero_and_negative_flags(cpu.register_y);
 
+    return true;
+}
+
+bool OpCode::tsx(CPU& cpu, AddressingMode mode)
+{
+    cpu.register_x = cpu.stack_pointer;
+    cpu.SetFlag(CPU::ZERO_FLAG, cpu.stack_pointer == 0);
+    cpu.SetFlag(CPU::NEGATIVE_FLAG, cpu.stack_pointer & CPU::NEGATIVE_FLAG);
+    
+    return true;
+}
+
+bool OpCode::txa(CPU& cpu, AddressingMode mode)
+{
+    cpu.register_a = cpu.register_x;
+    cpu.SetFlag(CPU::ZERO_FLAG, cpu.register_a == 0);
+    cpu.SetFlag(CPU::NEGATIVE_FLAG, cpu.register_a & CPU::NEGATIVE_FLAG);
+    
+    return true;
+}
+
+bool OpCode::txs(CPU& cpu, AddressingMode mode)
+{
+    cpu.stack_pointer = cpu.register_x;
+
+    return true;
+}
+
+bool OpCode::tya(CPU& cpu, AddressingMode mode)
+{
+    cpu.register_a = cpu.register_y;
+
+    cpu.SetFlag(CPU::ZERO_FLAG, cpu.register_a == 0);
+    cpu.SetFlag(CPU::NEGATIVE_FLAG, cpu.register_a & CPU::NEGATIVE_FLAG);
+    
     return true;
 }
 

@@ -42,6 +42,10 @@ struct OpCode
     static bool sta(CPU& cpu, AddressingMode mode);
     static bool tax(CPU& cpu, AddressingMode mode);
     static bool tay(CPU& cpu, AddressingMode mode);
+    static bool tsx(CPU& cpu, AddressingMode mode);
+    static bool txa(CPU& cpu, AddressingMode mode);
+    static bool txs(CPU& cpu, AddressingMode mode);
+    static bool tya(CPU& cpu, AddressingMode mode);
 
     static bool adc(CPU& cpu, AddressingMode mode);
     static bool sbc(CPU& cpu, AddressingMode mode);
