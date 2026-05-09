@@ -226,6 +226,12 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         // JSR - Jump to Subroutine
         OpCode(0x20, "JSR", 3, 6, Absolute, &jsr),
 
+        // LSR - Logical Shift Right
+        OpCode(0x4A, "LSR", 1, 2, Accumulator, &lsr),
+        OpCode(0x46, "LSR", 2, 5, ZeroPage, &lsr),
+        OpCode(0x56, "LSR", 2, 6, ZeroPage_X, &lsr),
+        OpCode(0x4E, "LSR", 3, 6, Absolute, &lsr),
+        OpCode(0x5E, "LSR", 3, 7, Absolute_X, &lsr),
 
     };
     return cpu_ops_code;
@@ -379,6 +385,31 @@ bool OpCode::ldy(CPU& cpu, AddressingMode mode)
     return true;
 }
 
+bool OpCode::lsr(CPU& cpu, AddressingMode mode)
+{
+    if (mode == Accumulator)
+    {
+        byte data = cpu.register_a;
+        bool carry = data & CPU::CARRY_FLAG;
+        byte result = data >> 1;
+        cpu.register_a = result;
+        cpu.SetFlag(CPU::CARRY_FLAG, carry);
+        cpu.SetFlag(CPU::ZERO_FLAG, result == 0);
+        cpu.SetFlag(CPU::NEGATIVE_FLAG, false); // 结果最高位总是 0
+    }
+    else
+    {
+        word addr = cpu.get_operand_address(mode);
+        byte data = cpu.mem_read(addr);
+        bool carry = data & CPU::CARRY_FLAG;
+        byte result = data >> 1;
+        cpu.mem_write(addr, result);
+        cpu.SetFlag(CPU::CARRY_FLAG, carry);
+        cpu.SetFlag(CPU::ZERO_FLAG, result == 0);
+        cpu.SetFlag(CPU::NEGATIVE_FLAG, false);
+    }
+    return true;
+}
 
 bool OpCode::adc(CPU& cpu, AddressingMode mode)
 {

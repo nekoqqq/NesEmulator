@@ -83,4 +83,6 @@ struct OpCode
     static bool lda(CPU& cpu, AddressingMode mode);
     static bool ldx(CPU& cpu, AddressingMode mode);
     static bool ldy(CPU& cpu, AddressingMode mode);
+    
+    static bool lsr(CPU&cpu, AddressingMode mode);
 };

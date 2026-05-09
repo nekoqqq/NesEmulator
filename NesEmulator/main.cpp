@@ -34,6 +34,7 @@ void test_jsr();
 void test_lda();
 void test_ldx();
 void test_ldy();
+void test_lsr();
 
 int main()
 {
@@ -70,4 +71,5 @@ int main()
     test_lda();
     test_ldx();
     test_ldy();
+    test_lsr();
 }
