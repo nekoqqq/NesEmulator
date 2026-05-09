@@ -62,4 +62,6 @@ struct OpCode
     static bool bmi(CPU& cpu, AddressingMode mode);
     static bool bvc(CPU& cpu, AddressingMode mode);
     static bool bvs(CPU& cpu, AddressingMode mode);
+    
+    static bool clc(CPU& cpu, AddressingMode mode);
 };

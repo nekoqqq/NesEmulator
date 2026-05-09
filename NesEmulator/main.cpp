@@ -14,6 +14,8 @@ void test_bne();
 void test_bpl();
 void test_brk();
 void test_bvc();
+void test_bvs();
+void test_clc();
 
 int main()
 {
@@ -29,4 +31,6 @@ int main()
     test_bpl();
     test_brk();
     test_bvc();
+    test_bvs();
+    test_clc();
 }

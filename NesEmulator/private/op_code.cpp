@@ -149,7 +149,13 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0x2C, "BIT", 3, 4, Absolute, &bit),
 
         // BVC - Branch if Overflow Clear
-        OpCode(0x24, "BVC", 2, 2, Relative, &bvc), // +1 if branch succeeds +2 if to a new page
+        OpCode(0x50, "BVC", 2, 2, Relative, &bvc), // +1 if branch succeeds +2 if to a new page
+
+        // BVS - Branch if Overflow Set
+        OpCode(0x70, "BVS", 2, 2, Relative, &bvs), // +1 if branch succeeds +2 if to a new page
+
+        // CLC - Clear Carry Flag
+        OpCode(0x18, "CLC", 1, 2, Implied, &clc),
 
     };
     return cpu_ops_code;
@@ -384,7 +390,7 @@ bool OpCode::bcs(CPU& cpu, AddressingMode mode)
 {
     int8_t jump = cpu.mem_read(cpu.program_counter++);
     // if carry clear
-    if ((cpu.status & CPU::CARRY_FLAG) == 1)
+    if (cpu.status & CPU::CARRY_FLAG)
     {
         word jump_addr = cpu.program_counter + jump; // +1是因为要从下个指令的地址开始，加上这个跳转的数值
         cpu.program_counter = jump_addr;
@@ -452,10 +458,16 @@ bool OpCode::bvc(CPU& cpu, AddressingMode mode)
 bool OpCode::bvs(CPU& cpu, AddressingMode mode)
 {
     int8_t jump = cpu.mem_read(cpu.program_counter++);
-    if ((cpu.status & CPU::OVERFLOW_FLAG) == 1)
+    if (cpu.status & CPU::OVERFLOW_FLAG)
     {
         word jump_addr = cpu.program_counter + jump;
         cpu.program_counter = jump_addr;
     }
+    return true;
+}
+
+bool OpCode::clc(CPU& cpu, AddressingMode mode)
+{
+    cpu.SetFlag(CPU::CARRY_FLAG, false);
     return true;
 }
