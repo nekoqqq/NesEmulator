@@ -11,6 +11,7 @@ void test_beq();
 void test_bit();
 void test_bmi();
 void test_bne();
+void test_bpl();
 
 int main()
 {
@@ -23,4 +24,5 @@ int main()
     test_bit();
     test_bmi();
     test_bne();
+    test_bpl();
 }

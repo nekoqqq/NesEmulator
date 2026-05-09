@@ -1,0 +1,116 @@
+﻿// test_bpl.cpp
+#include <cassert>
+#include <iostream>
+#include "../../public/cpu.h"
+#include "../../public/op_code.h"
+
+// 辅助：检查 C、Z、N 标志（BPL 不影响标志）
+static void check_flags(const CPU& cpu, bool carry, bool zero, bool negative) {
+    byte status = cpu.GetStatus();
+    assert(((status >> 0) & 1) == carry);
+    assert(((status >> 1) & 1) == zero);
+    assert(((status >> 7) & 1) == negative);
+}
+
+// ---------- 相对寻址模式（BPL 唯一寻址方式） ----------
+static void test_bpl_branch_taken() {
+    // 测试1：向前跳转，N=0，偏移 +10
+    {
+        CPU cpu;
+        cpu.ResetStatus();
+        cpu.SetFlag(CPU::NEGATIVE_FLAG, false); // N=0 满足跳转条件
+        cpu.SetPC(0x2000);
+        cpu.mem_write(cpu.GetPC(), 10);
+        word old_pc = cpu.GetPC();
+        OpCode::bpl(cpu, Relative);
+        word expected_pc = old_pc + 1 + 10;
+        assert(cpu.GetPC() == expected_pc);
+        check_flags(cpu, false, false, false);
+        std::cout << "[BPL] Branch forward test passed\n";
+    }
+
+    // 测试2：向后跳转，N=0，偏移 -5
+    {
+        CPU cpu;
+        cpu.ResetStatus();
+        cpu.SetFlag(CPU::NEGATIVE_FLAG, false);
+        cpu.SetPC(0x2000);
+        cpu.mem_write(cpu.GetPC(), 0xFB);      // -5 的补码
+        word old_pc = cpu.GetPC();
+        OpCode::bpl(cpu, Relative);
+        word expected_pc = old_pc + 1 + (signed char)0xFB;
+        assert(cpu.GetPC() == expected_pc);
+        check_flags(cpu, false, false, false);
+        std::cout << "[BPL] Branch backward test passed\n";
+    }
+
+    // 测试3：边界值 +127
+    {
+        CPU cpu;
+        cpu.ResetStatus();
+        cpu.SetFlag(CPU::NEGATIVE_FLAG, false);
+        cpu.SetPC(0x2100);
+        cpu.mem_write(cpu.GetPC(), 127);
+        word old_pc = cpu.GetPC();
+        OpCode::bpl(cpu, Relative);
+        word expected_pc = old_pc + 1 + 127;
+        assert(cpu.GetPC() == expected_pc);
+        std::cout << "[BPL] Branch max forward (+127) passed\n";
+    }
+
+    // 测试4：边界值 -128
+    {
+        CPU cpu;
+        cpu.ResetStatus();
+        cpu.SetFlag(CPU::NEGATIVE_FLAG, false);
+        cpu.SetPC(0x2200);
+        cpu.mem_write(cpu.GetPC(), 0x80);      // -128
+        word old_pc = cpu.GetPC();
+        OpCode::bpl(cpu, Relative);
+        word expected_pc = old_pc + 1 + (signed char)0x80;
+        assert(cpu.GetPC() == expected_pc);
+        std::cout << "[BPL] Branch max backward (-128) passed\n";
+    }
+}
+
+static void test_bpl_branch_not_taken() {
+    // 测试5：N=1 时不跳转
+    {
+        CPU cpu;
+        cpu.ResetStatus();
+        cpu.SetFlag(CPU::NEGATIVE_FLAG, true);  // N=1 不满足跳转
+        cpu.SetPC(0x3000);
+        cpu.mem_write(cpu.GetPC(), 50);
+        word old_pc = cpu.GetPC();
+        OpCode::bpl(cpu, Relative);
+        word expected_pc = old_pc + 1;          // 仅跳过偏移字节
+        assert(cpu.GetPC() == expected_pc);
+        check_flags(cpu, false, false, true);   // N 仍为 1
+        std::cout << "[BPL] No branch when N=1 passed\n";
+    }
+}
+
+static void test_bpl_page_cross() {
+    // 跨页测试
+    {
+        CPU cpu;
+        cpu.ResetStatus();
+        cpu.SetFlag(CPU::NEGATIVE_FLAG, false);
+        cpu.SetPC(0x20FF);
+        cpu.mem_write(cpu.GetPC(), 2);
+        word old_pc = cpu.GetPC();
+        OpCode::bpl(cpu, Relative);
+        word expected_pc = old_pc + 1 + 2;
+        assert(cpu.GetPC() == expected_pc);
+        std::cout << "[BPL] Page crossing branch passed\n";
+    }
+}
+
+// ---------- 外部调用入口 ----------
+void test_bpl() {
+    std::cout << "[BPL] Running tests...\n";
+    test_bpl_branch_taken();
+    test_bpl_branch_not_taken();
+    test_bpl_page_cross();
+    std::cout << "[BPL] All tests passed.\n\n";
+}
