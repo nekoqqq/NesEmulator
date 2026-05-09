@@ -59,7 +59,8 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         // BRK - Force Interrupt
         OpCode(0x00, "BRK", 1, 7, Implied, &brk),
 
-        OpCode(0xea, "NOP", 1, 2, NoneAddressing, &nop),
+        // NOP - No Operation
+        OpCode(0xEA, "NOP", 1, 2, Implied, &nop),
 
 
         // EOR
