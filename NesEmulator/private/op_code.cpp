@@ -37,7 +37,7 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0x7d, "ADC", 3, 4, Absolute_X, &adc), // +1 if page crossed
         OpCode(0x79, "ADC", 3, 4, Absolute_Y, &adc), // +1 if page crossed
         OpCode(0x61, "ADC", 2, 6, Indirect_X, &adc),
-        OpCode(0x71, "ADC", 2, 5, Indirect_Y, &adc), // +1 if page crossed
+        OpCode(0x71, "ADC", 2, 5, Indirect_D_Y, &adc), // +1 if page crossed
 
         // AND - Logical AND
         OpCode(0x29, "AND", 2, 2, Immediate, &op_and),
@@ -47,7 +47,7 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0x3d, "AND", 3, 4, Absolute_X, &op_and), // +1 if page crossed
         OpCode(0x39, "AND", 3, 4, Absolute_Y, &op_and), // +1 if page crossed
         OpCode(0x21, "AND", 2, 6, Indirect_X, &op_and),
-        OpCode(0x31, "AND", 2, 5, Indirect_Y, &op_and), // +1 if page crossed
+        OpCode(0x31, "AND", 2, 5, Indirect_D_Y, &op_and), // +1 if page crossed
 
         // ASL
         OpCode(0x0a, "ASL", 1, 2, Accumulator, &asl),
@@ -68,7 +68,7 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0x5d, "EOR", 3, 4, Absolute_X, &op_eor), // +1 if page crossed
         OpCode(0x59, "EOR", 3, 4, Absolute_Y, &op_eor), // +1 if page crossed
         OpCode(0x41, "EOR", 2, 6, Indirect_X, &op_eor),
-        OpCode(0x51, "EOR", 2, 5, Indirect_Y, &op_eor), // +1 if page crossed
+        OpCode(0x51, "EOR", 2, 5, Indirect_D_Y, &op_eor), // +1 if page crossed
 
         // ORA
         OpCode(0x09, "ORA", 2, 2, Immediate, &op_ora),
@@ -78,7 +78,7 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0x1d, "ORA", 3, 4, Absolute_X, &op_ora), // +1 if page crossed
         OpCode(0x19, "ORA", 3, 4, Absolute_Y, &op_ora), // +1 if page crossed
         OpCode(0x01, "ORA", 2, 6, Indirect_X, &op_ora),
-        OpCode(0x11, "ORA", 2, 5, Indirect_Y, &op_ora), // +1 if page crossed
+        OpCode(0x11, "ORA", 2, 5, Indirect_D_Y, &op_ora), // +1 if page crossed
 
 
         // ASR
@@ -105,7 +105,7 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0xbd, "LDA", 3, 4, Absolute_X, &lda), // +1 if page crossed
         OpCode(0xb9, "LDA", 3, 4, Absolute_Y, &lda), // +1 if page crossed
         OpCode(0xa1, "LDA", 2, 6, Indirect_X, &lda),
-        OpCode(0xb1, "LDA", 2, 5, Indirect_Y, &lda), // +1 if page crossed
+        OpCode(0xb1, "LDA", 2, 5, Indirect_D_Y, &lda), // +1 if page crossed
 
         // STA - Store Accumulator
         OpCode(0x85, "STA", 2, 3, ZeroPage, &sta),
@@ -114,7 +114,7 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0x9d, "STA", 3, 5, Absolute_X, &sta),
         OpCode(0x99, "STA", 3, 5, Absolute_Y, &sta),
         OpCode(0x81, "STA", 2, 6, Indirect_X, &sta),
-        OpCode(0x91, "STA", 2, 6, Indirect_Y, &sta),
+        OpCode(0x91, "STA", 2, 6, Indirect_D_Y, &sta),
 
 
         // SBC - Subtract with Carray
@@ -125,7 +125,7 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0xfd, "SBC", 3, 4, Absolute_X, &sbc), // +1 if page crossed
         OpCode(0xf9, "SBC", 3, 4, Absolute_Y, &sbc), // +1 if page crossed
         OpCode(0xe1, "SBC", 2, 6, Indirect_X, &sbc),
-        OpCode(0xf1, "SBC", 2, 5, Indirect_Y, &sbc), // +1 if page crossed
+        OpCode(0xf1, "SBC", 2, 5, Indirect_D_Y, &sbc), // +1 if page crossed
 
         // BCC
         OpCode(0x90, "BCC", 2, 2, NoneAddressing, &bcc), // +1 if branch succeeds	+2 if to a new page
@@ -276,7 +276,7 @@ bool OpCode::asl(CPU& cpu, AddressingMode mode)
         byte data = cpu.register_a;
         bool bOldCarry = data >> 7;
         byte result = static_cast<byte>((data << 1) & 0xff);
-        cpu.update_carry_flag(bOldCarry);
+        cpu.SetFlag(CPU::CARRY_FLAG,bOldCarry);
         cpu.update_zero_and_negative_flags(result);
         cpu.register_a = result;
     }
@@ -286,7 +286,7 @@ bool OpCode::asl(CPU& cpu, AddressingMode mode)
         byte data = cpu.mem_read(addr);
         bool bOldCarry = data >> 7;
         byte result = static_cast<byte>((data << 1) & 0xff);
-        cpu.update_carry_flag(bOldCarry);
+        cpu.SetFlag(CPU::CARRY_FLAG,bOldCarry);
         cpu.update_zero_and_negative_flags(result);
         cpu.mem_write(addr,result);
     }

@@ -35,6 +35,17 @@ public:
     // 记住，内存总共64KB大小，总共有64K行，每行都是8位，存一个Byte，数据就存在这些cell里面
     void mem_write_u16(word pos, uint16_t data);
 
+    // 常量定义
+    static constexpr byte CARRY_FLAG = 0x01;
+    static constexpr byte ZERO_FLAG = 0x02;
+    static constexpr byte INTERRUPT_FLAG = 0x04;
+    static constexpr byte DECIMAL_FLAG = 0x08;
+    static constexpr byte BREAK_FLAG = 0x10;
+    static constexpr byte UNUSED_FLAG = 0x20;
+    static constexpr byte OVERFLOW_FLAG = 0x40;
+    static constexpr byte NEGATIVE_FLAG = 0x80;
+
+
 protected:
     // 输出的处理函数
     friend ostream& operator<<(ostream& out, CPU* cpu);
@@ -51,7 +62,6 @@ private:
     void update_zero_and_negative_flags(byte res);
     word get_operand_address(AddressingMode& mode) const;
     void add_to_register_a(byte value);
-    void update_carry_flag(bool flag);
 
     // 程序计数器
     word program_counter;
@@ -69,11 +79,6 @@ private:
     // 内存 address space,虚拟地址空间,CPU只有2KB的RAM，其他的都是用来做内存映射
     byte memory[MEM_SIZE];
 
-    // 常量定义
-    static constexpr byte CARRY_FLAG = 0x01;
-    static constexpr byte ZERO_FLAG = 0x02;
-    static constexpr byte NEG_Flag = 0x80;
-
 public: // public getter
     const byte& GetStatus() const { return status; }
     const byte& GetRegisterA() const { return register_a; }
@@ -85,4 +90,13 @@ public: // public getter
     void ResetStatus() { status = 0; }
     void SetPC(word newPC) { program_counter = newPC; }
     const word& GetPC() const { return program_counter; }
+    void SetStatus(byte value) { status = value; }
+
+    void SetFlag(byte mask, bool set)
+    {
+        if (set)
+            status |= mask;
+        else
+            status &= ~mask;
+    }
 };

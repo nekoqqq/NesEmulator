@@ -217,18 +217,15 @@ word CPU::get_operand_address(AddressingMode& mode) const
             byte ptr = base + register_x;
             byte lo = mem_read(ptr);
             byte hi = mem_read(ptr + 1);
-            address = hi << 8 | lo;
+            address = static_cast<word>(hi << 8 | lo);
         }
         break;
 
-    case AddressingMode::Indirect_Y:
+    case AddressingMode::Indirect_D_Y:
         {
-            byte base = mem_read(program_counter);
-
-            byte ptr = base + register_y;
-            byte lo = mem_read(ptr);
-            byte hi = mem_read(ptr + 1);
-            address = hi << 8 | lo;
+            byte base = mem_read(program_counter); // 零页基址
+            word ptr = static_cast<word>(mem_read(base) | (mem_read(base + 1) << 8));
+            address = ptr + register_y;
         }
         break;
 
@@ -246,7 +243,7 @@ word CPU::get_operand_address(AddressingMode& mode) const
 
 void CPU::add_to_register_a(byte value)
 {
-    int s = register_a + (status & 0x01) + value;
+    int s = register_a + (status & CARRY_FLAG) + value;
 
     // 三种判断方式
     // 1. 判断两个符号位相同并且和结果的符号位相同则溢出
@@ -254,28 +251,14 @@ void CPU::add_to_register_a(byte value)
     // 2. 判断结果是不是比其中的一个数大，因为溢出的时候一定满足result < X AND result < y 
 
     // carry flag
-    update_carry_flag(s > 0xff);
+    SetFlag(CARRY_FLAG, s > 0xff);
 
     byte res = s;
 
     // overflow flag
-    if ((res ^ value) & (res ^ register_a) & 0x80)
-    {
-        status = status | 0x40;
-    }
-    else
-    {
-        status = status & 0xBF;
-    }
+    bool bOverflow = (res ^ value) & (res ^ register_a) & 0x80;
+    SetFlag(OVERFLOW_FLAG, bOverflow);
 
     register_a = res;
     update_zero_and_negative_flags(res);
-}
-
-void CPU::update_carry_flag(bool flag)
-{
-    if (flag)
-        status |= CARRY_FLAG;
-    else
-        status &= ~CARRY_FLAG;
 }

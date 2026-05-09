@@ -1,8 +1,6 @@
 ﻿/*
 NES模拟器使用C++实现
 */
-
-
 #include <cassert>
 
 #include "public/cpu.h"
@@ -12,6 +10,7 @@ using std::cout;
 using std::endl;
 
 void test_asl();
+void test_adc();
 
 int main()
 {
@@ -29,7 +28,7 @@ int main()
         cout << cpu << endl;
         cout << "Test passed: " << test_cnt++ << endl;
     }
-    
+
     // Test 2 LDA 立即数
     {
         CPU* cpu = new CPU();
@@ -68,7 +67,7 @@ int main()
     {
         CPU* cpu = new CPU();
         cout << cpu << endl;
-        cpu->SetRegisterX( 0xff);
+        cpu->SetRegisterX(0xff);
         vector<byte> test{0xe8, 0xe8, 0x00};
         cpu->load_and_run_no_reset(test);
         assert(cpu->GetRegisterX() == 0x01);
@@ -99,6 +98,6 @@ int main()
         assert(cpu->GetRegisterA() == 0x55);
         cout << "Test passed: " << test_cnt++ << endl;
     }
-    // ASL
-     test_asl();
+    test_adc();
+    // test_asl();
 }

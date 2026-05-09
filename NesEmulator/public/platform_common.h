@@ -20,7 +20,7 @@ enum AddressingMode:byte
     Absolute_X,
     Absolute_Y,
     Indirect_X,
-    Indirect_Y,
+    Indirect_D_Y, // 不是和Indirect,X对应的，而是(Indirect),Y
     NoneAddressing
 };
 
