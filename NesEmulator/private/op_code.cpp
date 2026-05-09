@@ -318,10 +318,9 @@ bool OpCode::asr(CPU& cpu, AddressingMode mode)
 
 bool OpCode::bcc(CPU& cpu, AddressingMode mode)
 {
-    int8_t jump = cpu.mem_read(cpu.program_counter);
+    int8_t jump = cpu.mem_read(cpu.program_counter++); // 注意分支指令的这个操作
     // if carry clear
-    cpu.program_counter++; // 注意分支指令的这个操作
-    if ((cpu.status & CPU::CARRY_FLAG << 0) == 0)
+    if ((cpu.status & CPU::CARRY_FLAG) == 0)
     {
         word jump_addr = cpu.program_counter + jump; // +1是因为要从下个指令的地址开始，加上这个跳转的数值
         cpu.program_counter = jump_addr;
@@ -331,10 +330,9 @@ bool OpCode::bcc(CPU& cpu, AddressingMode mode)
 
 bool OpCode::bcs(CPU& cpu, AddressingMode mode)
 {
-    int8_t jump = cpu.mem_read(cpu.program_counter);
+    int8_t jump = cpu.mem_read(cpu.program_counter++);
     // if carry clear
-    cpu.program_counter++;
-    if ((cpu.status & CPU::CARRY_FLAG << 0) == 1)
+    if ((cpu.status & CPU::CARRY_FLAG) == 1)
     {
         word jump_addr = cpu.program_counter + jump; // +1是因为要从下个指令的地址开始，加上这个跳转的数值
         cpu.program_counter = jump_addr;
@@ -344,11 +342,11 @@ bool OpCode::bcs(CPU& cpu, AddressingMode mode)
 
 bool OpCode::beq(CPU& cpu, AddressingMode mode)
 {
+    int8_t jump = cpu.mem_read(cpu.program_counter++);
     // if zero clear
-    if ((cpu.status & 1 << 1) == 0)
+    if (cpu.status & CPU::ZERO_FLAG)
     {
-        int8_t jump = cpu.mem_read(cpu.program_counter);
-        word jump_addr = cpu.program_counter + 1 + jump; // +1是因为要从下个指令的地址开始，加上这个跳转的数值
+        word jump_addr = cpu.program_counter + jump; // +1是因为要从下个指令的地址开始，加上这个跳转的数值
         cpu.program_counter = jump_addr;
     }
     return true;
@@ -356,11 +354,11 @@ bool OpCode::beq(CPU& cpu, AddressingMode mode)
 
 bool OpCode::bne(CPU& cpu, AddressingMode mode)
 {
+    int8_t jump = cpu.mem_read(cpu.program_counter++);
     // if zero set
-    if ((cpu.status & 1 << 1) == 1)
+    if ((cpu.status & CPU::ZERO_FLAG) == 0)
     {
-        int8_t jump = cpu.mem_read(cpu.program_counter);
-        word jump_addr = cpu.program_counter + 1 + jump; // +1是因为要从下个指令的地址开始，加上这个跳转的数值
+        word jump_addr = cpu.program_counter + jump; // +1是因为要从下个指令的地址开始，加上这个跳转的数值
         cpu.program_counter = jump_addr;
     }
     return true;
@@ -368,10 +366,10 @@ bool OpCode::bne(CPU& cpu, AddressingMode mode)
 
 bool OpCode::bpl(CPU& cpu, AddressingMode mode)
 {
+    int8_t jump = cpu.mem_read(cpu.program_counter++);
     if ((cpu.status & 1 << 7) == 0)
     {
-        int8_t jump = cpu.mem_read(cpu.program_counter);
-        word jump_addr = cpu.program_counter + 1 + jump;
+        word jump_addr = cpu.program_counter + jump;
         cpu.program_counter = jump_addr;
     }
     return true;
@@ -379,10 +377,10 @@ bool OpCode::bpl(CPU& cpu, AddressingMode mode)
 
 bool OpCode::bmi(CPU& cpu, AddressingMode mode)
 {
+    int8_t jump = cpu.mem_read(cpu.program_counter++);
     if ((cpu.status & 1 << 7) == 1)
     {
-        int8_t jump = cpu.mem_read(cpu.program_counter);
-        word jump_addr = cpu.program_counter + 1 + jump;
+        word jump_addr = cpu.program_counter + jump;
         cpu.program_counter = jump_addr;
     }
     return true;
@@ -390,10 +388,10 @@ bool OpCode::bmi(CPU& cpu, AddressingMode mode)
 
 bool OpCode::bvc(CPU& cpu, AddressingMode mode)
 {
+    int8_t jump = cpu.mem_read(cpu.program_counter++);
     if ((cpu.status & 1 << 6) == 0)
     {
-        int8_t jump = cpu.mem_read(cpu.program_counter);
-        word jump_addr = cpu.program_counter + 1 + jump;
+        word jump_addr = cpu.program_counter + jump;
         cpu.program_counter = jump_addr;
     }
     return true;
@@ -401,10 +399,10 @@ bool OpCode::bvc(CPU& cpu, AddressingMode mode)
 
 bool OpCode::bvs(CPU& cpu, AddressingMode mode)
 {
+    int8_t jump = cpu.mem_read(cpu.program_counter++);
     if ((cpu.status & 1 << 6) == 1)
     {
-        int8_t jump = cpu.mem_read(cpu.program_counter);
-        word jump_addr = cpu.program_counter + 1 + jump;
+        word jump_addr = cpu.program_counter + jump;
         cpu.program_counter = jump_addr;
     }
     return true;

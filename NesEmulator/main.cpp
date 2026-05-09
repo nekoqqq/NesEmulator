@@ -12,6 +12,7 @@ void test_adc();
 void test_and();
 void test_bcc();
 void test_bcs();
+void test_beq();
 
 int main()
 {
@@ -20,4 +21,5 @@ int main()
     test_and();
     test_bcc();
     test_bcs();
+    test_beq();
 }
