@@ -52,6 +52,8 @@ void test_sei();
 void test_sta();
 void test_stx();
 void test_sty();
+void test_tax();
+void test_tay();
 
 int main()
 {
@@ -106,4 +108,6 @@ int main()
     test_sta();
     test_stx();
     test_sty();
+    test_tax();
+    test_tay();
 }

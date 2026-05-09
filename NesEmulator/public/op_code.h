@@ -41,6 +41,7 @@ struct OpCode
     static bool brk(CPU& cpu, AddressingMode mode);
     static bool sta(CPU& cpu, AddressingMode mode);
     static bool tax(CPU& cpu, AddressingMode mode);
+    static bool tay(CPU& cpu, AddressingMode mode);
 
     static bool adc(CPU& cpu, AddressingMode mode);
     static bool sbc(CPU& cpu, AddressingMode mode);

@@ -91,8 +91,11 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0x4e, "ASR", 3, 6, Absolute, &asr),
         OpCode(0x5e, "ASR", 3, 7, Absolute_X, &asr),
 
-        // TAX - Transfer Acuumulator to X
-        OpCode(0xaa, "TAX", 1, 2, NoneAddressing, &tax),
+        // TAX - Transfer Accumulator to X
+        OpCode(0xAA, "TAX", 1, 2, Implied, &tax),
+
+        // TAY - Transfer Accumulator to Y
+        OpCode(0xA8, "TAY", 1, 2, Implied, &tay),
 
         // LDA - Load Accumulator
         OpCode(0xa9, "LDA", 2, 2, Immediate, &lda),
@@ -380,6 +383,14 @@ bool OpCode::tax(CPU& cpu, AddressingMode mode)
 {
     cpu.register_x = cpu.register_a;
     cpu.update_zero_and_negative_flags(cpu.register_x);
+
+    return true;
+}
+
+bool OpCode::tay(CPU& cpu, AddressingMode mode)
+{
+    cpu.register_y = cpu.register_a;
+    cpu.update_zero_and_negative_flags(cpu.register_y);
 
     return true;
 }
