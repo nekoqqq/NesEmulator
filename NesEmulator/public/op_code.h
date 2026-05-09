@@ -42,8 +42,7 @@ struct OpCode
     static bool lda(CPU& cpu, AddressingMode mode);
     static bool sta(CPU& cpu, AddressingMode mode);
     static bool tax(CPU& cpu, AddressingMode mode);
-    static bool inx(CPU& cpu, AddressingMode mode);
-    static bool iny(CPU& cpu, AddressingMode mode);
+
     static bool adc(CPU& cpu, AddressingMode mode);
     static bool sbc(CPU& cpu, AddressingMode mode);
     static bool op_eor(CPU& cpu, AddressingMode mode);
@@ -67,11 +66,15 @@ struct OpCode
     static bool cld(CPU& cpu, AddressingMode mode);
     static bool cli(CPU& cpu, AddressingMode mode);
     static bool clv(CPU& cpu, AddressingMode mode);
-    static bool cmp_common(CPU&cpu, AddressingMode mode,byte register_data);
+    static bool cmp_common(CPU& cpu, AddressingMode mode, byte register_data);
     static bool cmp(CPU& cpu, AddressingMode mode);
     static bool cpx(CPU& cpu, AddressingMode mode);
     static bool cpy(CPU& cpu, AddressingMode mode);
     static bool dec(CPU& cpu, AddressingMode mode);
     static bool dex(CPU& cpu, AddressingMode mode);
     static bool dey(CPU& cpu, AddressingMode mode);
+
+    static bool inc(CPU& cpu, AddressingMode mode);
+    static bool inx(CPU& cpu, AddressingMode mode);
+    static bool iny(CPU& cpu, AddressingMode mode);
 };

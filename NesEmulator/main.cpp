@@ -26,6 +26,9 @@ void test_dec();
 void test_dex();
 void test_dey();
 void test_eor();
+void test_inc();
+void test_inx();
+void test_iny();
 
 int main()
 {
@@ -54,4 +57,7 @@ int main()
     test_dex();
     test_dey();
     test_eor();
+    test_inc();
+    test_inx();
+    test_iny();
 }

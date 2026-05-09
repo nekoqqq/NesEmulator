@@ -1,0 +1,166 @@
+﻿// test_inc.cpp
+#include <cassert>
+#include <iostream>
+#include "../../public/cpu.h"
+#include "../../public/op_code.h"
+
+static void check_flags(const CPU& cpu, bool zero, bool negative) {
+    byte status = cpu.GetStatus();
+    assert(((status >> 1) & 1) == zero);
+    assert(((status >> 7) & 1) == negative);
+}
+
+// ---------- 零页模式 ----------
+static void test_inc_zero_page() {
+    word addr = 0x10;
+
+    // 测试1：0x12 -> 0x13，无零无负
+    {
+        CPU cpu;
+        cpu.mem_write(addr, 0x12);
+        cpu.SetPC(0x1000);
+        cpu.mem_write(cpu.GetPC(), static_cast<byte>(addr));
+        cpu.ResetStatus();
+        OpCode::inc(cpu, ZeroPage);
+        assert(cpu.mem_read(addr) == 0x13);
+        check_flags(cpu, false, false);
+        std::cout << "[INC] ZeroPage test 1 passed\n";
+    }
+
+    // 测试2：0xFF -> 0x00，Z=1, N=0
+    {
+        CPU cpu;
+        cpu.mem_write(addr, 0xFF);
+        cpu.SetPC(0x1000);
+        cpu.mem_write(cpu.GetPC(), static_cast<byte>(addr));
+        cpu.ResetStatus();
+        OpCode::inc(cpu, ZeroPage);
+        assert(cpu.mem_read(addr) == 0x00);
+        check_flags(cpu, true, false);
+        std::cout << "[INC] ZeroPage test 2 passed\n";
+    }
+
+    // 测试3：0x7F -> 0x80，N=1
+    {
+        CPU cpu;
+        cpu.mem_write(addr, 0x7F);
+        cpu.SetPC(0x1000);
+        cpu.mem_write(cpu.GetPC(), static_cast<byte>(addr));
+        cpu.ResetStatus();
+        OpCode::inc(cpu, ZeroPage);
+        assert(cpu.mem_read(addr) == 0x80);
+        check_flags(cpu, false, true);
+        std::cout << "[INC] ZeroPage test 3 passed\n";
+    }
+}
+
+// ---------- 零页 X 模式 ----------
+static void test_inc_zero_page_x() {
+    byte base = 0x10;
+    byte x_val = 5;
+    word target = (base + x_val) & 0xFF; // 0x15
+
+    {
+        CPU cpu;
+        cpu.SetRegisterX(x_val);
+        cpu.mem_write(target, 0x01);
+        cpu.SetPC(0x1000);
+        cpu.mem_write(cpu.GetPC(), base);
+        cpu.ResetStatus();
+        OpCode::inc(cpu, ZeroPage_X);
+        assert(cpu.mem_read(target) == 0x02);
+        check_flags(cpu, false, false);
+        std::cout << "[INC] ZeroPageX test 1 passed\n";
+    }
+
+    // 绕回测试：0xFF + 1 = 0x00
+    {
+        CPU cpu;
+        cpu.SetRegisterX(1);
+        cpu.mem_write(0x00, 0xFF);
+        cpu.SetPC(0x1000);
+        cpu.mem_write(cpu.GetPC(), 0xFF);
+        cpu.ResetStatus();
+        OpCode::inc(cpu, ZeroPage_X);
+        assert(cpu.mem_read(0x00) == 0x00);
+        check_flags(cpu, true, false);
+        std::cout << "[INC] ZeroPageX test 2 (wrap) passed\n";
+    }
+}
+
+// ---------- 绝对模式 ----------
+static void test_inc_absolute() {
+    word addr = 0x1234;
+
+    {
+        CPU cpu;
+        cpu.mem_write(addr, 0x01);
+        cpu.SetPC(0x2000);
+        cpu.mem_write_u16(cpu.GetPC(), addr);
+        cpu.ResetStatus();
+        OpCode::inc(cpu, Absolute);
+        assert(cpu.mem_read(addr) == 0x02);
+        check_flags(cpu, false, false);
+        std::cout << "[INC] Absolute test 1 passed\n";
+    }
+
+    // 0xFF -> 0x00
+    {
+        CPU cpu;
+        cpu.mem_write(addr, 0xFF);
+        cpu.SetPC(0x2000);
+        cpu.mem_write_u16(cpu.GetPC(), addr);
+        cpu.ResetStatus();
+        OpCode::inc(cpu, Absolute);
+        assert(cpu.mem_read(addr) == 0x00);
+        check_flags(cpu, true, false);
+        std::cout << "[INC] Absolute test 2 passed\n";
+    }
+}
+
+// ---------- 绝对 X 模式 ----------
+static void test_inc_absolute_x() {
+    word base = 0x1200;
+    byte x_val = 0x34;
+    word target = base + x_val;
+
+    {
+        CPU cpu;
+        cpu.SetRegisterX(x_val);
+        cpu.mem_write(target, 0x7F);
+        cpu.SetPC(0x3000);
+        cpu.mem_write_u16(cpu.GetPC(), base);
+        cpu.ResetStatus();
+        OpCode::inc(cpu, Absolute_X);
+        assert(cpu.mem_read(target) == 0x80);
+        check_flags(cpu, false, true);
+        std::cout << "[INC] AbsoluteX test 1 passed\n";
+    }
+
+    // 跨页测试
+    {
+        CPU cpu;
+        word base2 = 0x12FF;
+        byte x_val2 = 2;
+        word target2 = base2 + x_val2; // 0x1301
+        cpu.SetRegisterX(x_val2);
+        cpu.mem_write(target2, 0x00);
+        cpu.SetPC(0x3000);
+        cpu.mem_write_u16(cpu.GetPC(), base2);
+        cpu.ResetStatus();
+        OpCode::inc(cpu, Absolute_X);
+        assert(cpu.mem_read(target2) == 0x01);
+        check_flags(cpu, false, false);
+        std::cout << "[INC] AbsoluteX test 2 (page cross) passed\n";
+    }
+}
+
+// ---------- 外部调用入口 ----------
+void test_inc() {
+    std::cout << "[INC] Running tests...\n";
+    test_inc_zero_page();
+    test_inc_zero_page_x();
+    test_inc_absolute();
+    test_inc_absolute_x();
+    std::cout << "[INC] All tests passed.\n\n";
+}

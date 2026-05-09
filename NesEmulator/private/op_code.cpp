@@ -93,12 +93,6 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         // TAX - Transfer Acuumulator to X
         OpCode(0xaa, "TAX", 1, 2, NoneAddressing, &tax),
 
-        // INX - Increment X Register
-        OpCode(0xe8, "INX", 1, 2, NoneAddressing, &inx),
-
-        // INY - Increment Y Register
-        OpCode(0xc8, "INY", 1, 2, NoneAddressing, &iny),
-
         // LDA - Load Accumulator
         OpCode(0xa9, "LDA", 2, 2, Immediate, &lda),
         OpCode(0xa5, "LDA", 2, 3, ZeroPage, &lda),
@@ -195,8 +189,20 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         // DEX - Decrement X Register
         OpCode(0xCA, "DEX", 2, 5, Implied, &dex),
 
-        // DEX - Decrement Y Register
+        // DEY - Decrement Y Register
         OpCode(0x88, "DEY", 2, 5, Implied, &dey),
+
+        // INC - Increment Memory
+        OpCode(0xE6, "INC", 2, 5, ZeroPage, &inc),
+        OpCode(0xF6, "INC", 2, 6, ZeroPage_X, &inc),
+        OpCode(0xEE, "INC", 3, 6, Absolute, &inc),
+        OpCode(0xFE, "INC", 3, 7, Absolute_X, &inc),
+
+        // INX - Increment X Register
+        OpCode(0xE8, "INX", 1, 2, Implied, &inx),
+
+        // INY - Increment Y Register
+        OpCode(0xC8, "INY", 1, 2, Implied, &iny),
 
 
     };
@@ -586,5 +592,17 @@ bool OpCode::dey(CPU& cpu, AddressingMode mode)
     cpu.register_y--;
     cpu.SetFlag(CPU::ZERO_FLAG, cpu.register_y == 0);
     cpu.SetFlag(CPU::NEGATIVE_FLAG, cpu.register_y & CPU::NEGATIVE_FLAG);
+    return true;
+}
+
+bool OpCode::inc(CPU& cpu, AddressingMode mode)
+{
+    word addr = cpu.get_operand_address(mode);
+    byte data = cpu.mem_read(addr);
+    byte result = data + 1;
+    cpu.mem_write(addr, result);
+    cpu.SetFlag(CPU::ZERO_FLAG, result == 0);
+    cpu.SetFlag(CPU::NEGATIVE_FLAG, result & CPU::NEGATIVE_FLAG);
+
     return true;
 }
