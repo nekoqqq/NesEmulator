@@ -164,7 +164,17 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0x58, "CLI", 1, 2, Implied, &cli),
 
         // CLV - Clear Overflow Flag
-        OpCode(0xB8, "CLV", 1, 2, Implied, &clv)
+        OpCode(0xB8, "CLV", 1, 2, Implied, &clv),
+
+        // CMP - Compare
+        OpCode(0xC9, "CMP", 2, 2, Immediate, &cmp),
+        OpCode(0xC5, "CMP", 2, 3, ZeroPage, &cmp),
+        OpCode(0xD5, "CMP", 2, 4, ZeroPage_X, &cmp),
+        OpCode(0xCD, "CMP", 3, 4, Absolute, &cmp),
+        OpCode(0xDD, "CMP", 3, 4, Absolute_X, &cmp), // (+1 if page crossed)
+        OpCode(0xD9, "CMP", 3, 4, Absolute_Y, &cmp), // (+1 if page crossed)
+        OpCode(0xC1, "CMP", 2, 6, Indirect_X, &cmp),
+        OpCode(0xD1, "CMP", 2, 5, Indirect_D_Y, &cmp), // (+1 if page crossed)
 
     };
     return cpu_ops_code;
@@ -496,5 +506,19 @@ bool OpCode::cli(CPU& cpu, AddressingMode mode)
 bool OpCode::clv(CPU& cpu, AddressingMode mode)
 {
     cpu.SetFlag(CPU::OVERFLOW_FLAG, false);
+    return true;
+}
+
+bool OpCode::cmp(CPU& cpu, AddressingMode mode)
+{
+    word addr = cpu.get_operand_address(mode);
+    byte data = cpu.mem_read(addr);
+
+    int result = cpu.register_a - data;
+
+    cpu.SetFlag(CPU::CARRY_FLAG, cpu.register_a >= data);
+    cpu.SetFlag(CPU::ZERO_FLAG, result == 0);
+    cpu.SetFlag(CPU::NEGATIVE_FLAG, result & CPU::NEGATIVE_FLAG);
+    
     return true;
 }

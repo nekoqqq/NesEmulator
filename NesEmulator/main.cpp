@@ -19,6 +19,7 @@ void test_clc();
 void test_cld();
 void test_cli();
 void test_clv();
+void test_cmp();
 
 int main()
 {
@@ -40,4 +41,5 @@ int main()
     test_cld();
     test_cli();
     test_clv();
+    test_cmp();
 }
