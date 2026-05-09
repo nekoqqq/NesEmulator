@@ -156,6 +156,15 @@ unordered_map<byte, OpCode> OpCode::OPCODES_MAP = []()
     return op_code_map;
 }();
 
+bool OpCode::op_and(CPU& cpu, AddressingMode mode)
+{
+    word addr = cpu.get_operand_address(mode);
+    byte data = cpu.mem_read(addr);
+    cpu.register_a = data & cpu.register_a;
+    cpu.update_zero_and_negative_flags(cpu.register_a);
+    return true;
+}
+
 bool OpCode::nop(CPU& cpu, AddressingMode mode)
 {
     return true;
@@ -242,14 +251,6 @@ bool OpCode::sbc(CPU& cpu, AddressingMode mode)
     return true;
 }
 
-bool OpCode::op_and(CPU& cpu, AddressingMode mode)
-{
-    word addr = cpu.get_operand_address(mode);
-    byte data = cpu.mem_read(addr);
-    cpu.register_a = data & cpu.register_a;
-    cpu.update_zero_and_negative_flags(cpu.register_a);
-    return true;
-}
 
 bool OpCode::op_eor(CPU& cpu, AddressingMode mode)
 {
@@ -276,7 +277,7 @@ bool OpCode::asl(CPU& cpu, AddressingMode mode)
         byte data = cpu.register_a;
         bool bOldCarry = data >> 7;
         byte result = static_cast<byte>((data << 1) & 0xff);
-        cpu.SetFlag(CPU::CARRY_FLAG,bOldCarry);
+        cpu.SetFlag(CPU::CARRY_FLAG, bOldCarry);
         cpu.update_zero_and_negative_flags(result);
         cpu.register_a = result;
     }
@@ -286,9 +287,9 @@ bool OpCode::asl(CPU& cpu, AddressingMode mode)
         byte data = cpu.mem_read(addr);
         bool bOldCarry = data >> 7;
         byte result = static_cast<byte>((data << 1) & 0xff);
-        cpu.SetFlag(CPU::CARRY_FLAG,bOldCarry);
+        cpu.SetFlag(CPU::CARRY_FLAG, bOldCarry);
         cpu.update_zero_and_negative_flags(result);
-        cpu.mem_write(addr,result);
+        cpu.mem_write(addr, result);
     }
     return true;
 }

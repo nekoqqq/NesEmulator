@@ -233,5 +233,5 @@ void test_asl()
     test_asl_zero_page_x();
     test_asl_absolute();
     test_asl_absolute_x();
-    std::cout << "[ASL] All tests passed.\n";
+    std::cout << "[ASL] All tests passed.\n\n";
 }

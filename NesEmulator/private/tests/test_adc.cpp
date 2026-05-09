@@ -306,5 +306,5 @@ void test_adc() {
     test_adc_absolute_y();
     test_adc_indirect_x();
     test_adc_indirect_y();
-    std::cout << "[ADC] All tests passed.\n";
+    std::cout << "[ADC] All tests passed.\n\n";
 }

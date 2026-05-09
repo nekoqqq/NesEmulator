@@ -11,6 +11,7 @@ using std::endl;
 
 void test_asl();
 void test_adc();
+void test_and();
 
 int main()
 {
@@ -99,5 +100,6 @@ int main()
         cout << "Test passed: " << test_cnt++ << endl;
     }
     test_adc();
-    // test_asl();
+    test_asl();
+    test_and();
 }

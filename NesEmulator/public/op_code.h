@@ -34,6 +34,7 @@ struct OpCode
     static vector<OpCode> CPU_OPS_CODES; // 所有指令共享的操作码，其实就是打个表，可以根据操作码查出对应的映射，以及相应的一些属性，如果用python实现，就是一个大map
     static unordered_map<byte, OpCode> OPCODES_MAP; // 所有成员共享的东西，这个当然可以放在外面定义，但是和指令是有关系的，所以放在这里
 
+    static bool op_and(CPU& cpu, AddressingMode mode);
     static bool nop(CPU& cpu, AddressingMode mode);
     static bool brk(CPU& cpu, AddressingMode mode);
     static bool lda(CPU& cpu, AddressingMode mode);
@@ -43,7 +44,6 @@ struct OpCode
     static bool iny(CPU& cpu, AddressingMode mode);
     static bool adc(CPU& cpu, AddressingMode mode);
     static bool sbc(CPU& cpu, AddressingMode mode);
-    static bool op_and(CPU& cpu, AddressingMode mode);
     static bool op_eor(CPU& cpu, AddressingMode mode);
     static bool op_ora(CPU& cpu, AddressingMode mode);
     static bool asl(CPU& cpu, AddressingMode mode);
