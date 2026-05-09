@@ -56,7 +56,9 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0x0e, "ASL", 3, 6, Absolute, &asl),
         OpCode(0x1e, "ASL", 3, 7, Absolute_X, &asl),
 
-        OpCode(0x00, "BRK", 1, 7, NoneAddressing, &brk),
+        // BRK - Force Interrupt
+        OpCode(0x00, "BRK", 1, 7, Implied, &brk),
+
         OpCode(0xea, "NOP", 1, 2, NoneAddressing, &nop),
 
 
@@ -174,7 +176,7 @@ bool OpCode::bit(CPU& cpu, AddressingMode mode)
     cpu.SetFlag(CPU::NEGATIVE_FLAG, value & CPU::NEGATIVE_FLAG);
 
     cpu.SetFlag(CPU::OVERFLOW_FLAG, value & CPU::OVERFLOW_FLAG);
-    
+
     return true;
 }
 
@@ -194,7 +196,32 @@ bool OpCode::nop(CPU& cpu, AddressingMode mode)
 
 bool OpCode::brk(CPU& cpu, AddressingMode mode)
 {
-    return true; // halt指令退出
+    word next_pc = cpu.program_counter + 2;
+
+    // 1. 存下调指令地址到栈中
+    // 下一条指令地址高字节
+    cpu.mem_write(cpu.stack_pointer + 0x0100, (next_pc >> 8) & BYTE_MAX);
+    cpu.stack_pointer--;
+
+    // 下一条指令地址低字节
+    cpu.mem_write(cpu.stack_pointer + 0x0100, next_pc & BYTE_MAX);
+    cpu.stack_pointer--;
+
+    // 2. 设置中断标志
+    cpu.SetFlag(CPU::BREAK_FLAG, true);
+
+    // 3. CPU状态压栈
+    cpu.mem_write(cpu.stack_pointer + 0x0100, cpu.status);
+    cpu.stack_pointer--;
+
+    // 4. 设置中断禁用标志I（表示正在中断中）
+    cpu.SetFlag(CPU::INTERRUPT_FLAG, true);
+
+    // 5. 读取中断向量表（$FFFE低字节，$FFFF高字节）并跳转
+    word int_vector = cpu.mem_read(0xFFFF) << 8 | cpu.mem_read(0xFFFE);
+    cpu.program_counter = int_vector;
+
+    return true; 
 }
 
 bool OpCode::lda(CPU& cpu, AddressingMode mode)
@@ -389,7 +416,7 @@ bool OpCode::bne(CPU& cpu, AddressingMode mode)
 bool OpCode::bpl(CPU& cpu, AddressingMode mode)
 {
     int8_t jump = cpu.mem_read(cpu.program_counter++);
-    if ((cpu.status &CPU::NEGATIVE_FLAG) == 0)
+    if ((cpu.status & CPU::NEGATIVE_FLAG) == 0)
     {
         word jump_addr = cpu.program_counter + jump;
         cpu.program_counter = jump_addr;

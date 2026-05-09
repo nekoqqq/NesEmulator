@@ -25,4 +25,6 @@ enum AddressingMode:byte
     NoneAddressing
 };
 
+constexpr byte BYTE_MAX = 0xFF;
+
 const int MEM_SIZE = 0x10000; // 6502CPU是16位的CPU，最多可以使用2**16 次方，寻址用2个字节，最多65536字节，也就是64 KB内存

@@ -91,6 +91,8 @@ public: // public getter
     void SetPC(word newPC) { program_counter = newPC; }
     const word& GetPC() const { return program_counter; }
     void SetStatus(byte value) { status = value; }
+    const byte& GetStackPointer() const { return stack_pointer; }
+    void SetStackPointer(byte newStackPointer) { stack_pointer = newStackPointer; }
 
     void SetFlag(byte mask, bool set)
     {

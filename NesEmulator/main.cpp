@@ -12,6 +12,7 @@ void test_bit();
 void test_bmi();
 void test_bne();
 void test_bpl();
+void test_brk();
 
 int main()
 {
@@ -25,4 +26,5 @@ int main()
     test_bmi();
     test_bne();
     test_bpl();
+    test_brk();
 }
