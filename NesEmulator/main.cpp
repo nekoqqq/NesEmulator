@@ -9,6 +9,7 @@ void test_bcc();
 void test_bcs();
 void test_beq();
 void test_bit();
+void test_bmi();
 
 int main()
 {
@@ -19,4 +20,5 @@ int main()
     test_bcs();
     test_beq();
     test_bit();
+    test_bmi();
 }

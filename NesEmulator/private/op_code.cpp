@@ -389,7 +389,7 @@ bool OpCode::bne(CPU& cpu, AddressingMode mode)
 bool OpCode::bpl(CPU& cpu, AddressingMode mode)
 {
     int8_t jump = cpu.mem_read(cpu.program_counter++);
-    if ((cpu.status & 1 << 7) == 0)
+    if ((cpu.status &CPU::NEGATIVE_FLAG) == 0)
     {
         word jump_addr = cpu.program_counter + jump;
         cpu.program_counter = jump_addr;
@@ -400,7 +400,7 @@ bool OpCode::bpl(CPU& cpu, AddressingMode mode)
 bool OpCode::bmi(CPU& cpu, AddressingMode mode)
 {
     int8_t jump = cpu.mem_read(cpu.program_counter++);
-    if ((cpu.status & 1 << 7) == 1)
+    if (cpu.status & CPU::NEGATIVE_FLAG)
     {
         word jump_addr = cpu.program_counter + jump;
         cpu.program_counter = jump_addr;
