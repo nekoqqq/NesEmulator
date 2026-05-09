@@ -158,7 +158,7 @@ void CPU::update_zero_and_negative_flags(byte res)
     }
 }
 
-uint16_t CPU::get_operand_address(AddressingMode& mode) const
+word CPU::get_operand_address(AddressingMode& mode) const
 {
     uint16_t address;
     switch (mode)
@@ -182,7 +182,7 @@ uint16_t CPU::get_operand_address(AddressingMode& mode) const
     case AddressingMode::ZeroPage_X:
         {
             byte pos = mem_read(program_counter);
-            address = pos + register_x;
+            address = (pos + register_x) & 0xff; // 只取低8位
         }
         break;
 
@@ -190,7 +190,7 @@ uint16_t CPU::get_operand_address(AddressingMode& mode) const
     case AddressingMode::ZeroPage_Y:
         {
             byte pos = mem_read(program_counter);
-            address = pos + register_y; // 指针偏移
+            address = (pos + register_y) & 0xff; // 只取低8位
         }
         break;
 
@@ -254,14 +254,7 @@ void CPU::add_to_register_a(byte value)
     // 2. 判断结果是不是比其中的一个数大，因为溢出的时候一定满足result < X AND result < y 
 
     // carry flag
-    if (s > 0xff)
-    {
-        status = status | 0x01;
-    }
-    else
-    {
-        status = status & 0xfe;
-    }
+    update_carry_flag(s > 0xff);
 
     byte res = s;
 
@@ -277,4 +270,12 @@ void CPU::add_to_register_a(byte value)
 
     register_a = res;
     update_zero_and_negative_flags(res);
+}
+
+void CPU::update_carry_flag(bool flag)
+{
+    if (flag)
+        status |= CARRY_FLAG;
+    else
+        status &= ~CARRY_FLAG;
 }

@@ -10,7 +10,9 @@ using program = vector<byte>;
 // 寻址方式
 enum AddressingMode:byte
 {
-    Immediate,
+    Implied, // 隐含寻址，操作数隐含在指令中，无需其他指定
+    Accumulator, // 直接操作ACC，比如LSR A，左移操作数
+    Immediate, // 立即寻址，数据在操作码中
     ZeroPage,
     ZeroPage_X,
     ZeroPage_Y,

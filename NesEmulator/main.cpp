@@ -11,6 +11,8 @@ NES模拟器使用C++实现
 using std::cout;
 using std::endl;
 
+void test_asl();
+
 int main()
 {
     int test_cnt = 1;
@@ -97,4 +99,6 @@ int main()
         assert(cpu->GetRegisterA() == 0x55);
         cout << "Test passed: " << test_cnt++ << endl;
     }
+    // ASL
+     test_asl();
 }

@@ -29,10 +29,17 @@ const char* OpCode::to_string()
 vector<OpCode> OpCode::CPU_OPS_CODES = []()
 {
     vector<OpCode> cpu_ops_code = {
-        OpCode(0x00, "BRK", 1, 7, NoneAddressing, &brk),
-        OpCode(0xea, "NOP", 1, 2, NoneAddressing, &nop),
+        // ADC - Add with Carry
+        OpCode(0x69, "ADC", 2, 2, Immediate, &adc),
+        OpCode(0x65, "ADC", 2, 3, ZeroPage, &adc),
+        OpCode(0x75, "ADC", 2, 4, ZeroPage_X, &adc),
+        OpCode(0x6d, "ADC", 3, 4, Absolute, &adc),
+        OpCode(0x7d, "ADC", 3, 4, Absolute_X, &adc), // +1 if page crossed
+        OpCode(0x79, "ADC", 3, 4, Absolute_Y, &adc), // +1 if page crossed
+        OpCode(0x61, "ADC", 2, 6, Indirect_X, &adc),
+        OpCode(0x71, "ADC", 2, 5, Indirect_Y, &adc), // +1 if page crossed
 
-        // AND
+        // AND - Logical AND
         OpCode(0x29, "AND", 2, 2, Immediate, &op_and),
         OpCode(0x25, "AND", 2, 3, ZeroPage, &op_and),
         OpCode(0x35, "AND", 2, 4, ZeroPage_X, &op_and),
@@ -41,6 +48,17 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0x39, "AND", 3, 4, Absolute_Y, &op_and), // +1 if page crossed
         OpCode(0x21, "AND", 2, 6, Indirect_X, &op_and),
         OpCode(0x31, "AND", 2, 5, Indirect_Y, &op_and), // +1 if page crossed
+
+        // ASL
+        OpCode(0x0a, "ASL", 1, 2, Accumulator, &asl),
+        OpCode(0x06, "ASL", 2, 5, ZeroPage, &asl),
+        OpCode(0x16, "ASL", 2, 6, ZeroPage_X, &asl),
+        OpCode(0x0e, "ASL", 3, 6, Absolute, &asl),
+        OpCode(0x1e, "ASL", 3, 7, Absolute_X, &asl),
+
+        OpCode(0x00, "BRK", 1, 7, NoneAddressing, &brk),
+        OpCode(0xea, "NOP", 1, 2, NoneAddressing, &nop),
+
 
         // EOR
         OpCode(0x49, "EOR", 2, 2, Immediate, &op_eor),
@@ -62,12 +80,6 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0x01, "ORA", 2, 6, Indirect_X, &op_ora),
         OpCode(0x11, "ORA", 2, 5, Indirect_Y, &op_ora), // +1 if page crossed
 
-        // ASL
-        OpCode(0x0a, "ASL", 1, 2, NoneAddressing, &asl),
-        OpCode(0x06, "ASL", 2, 5, ZeroPage, &asl),
-        OpCode(0x16, "ASL", 2, 6, ZeroPage_X, &asl),
-        OpCode(0x0e, "ASL", 3, 6, Absolute, &asl),
-        OpCode(0x1e, "ASL", 3, 7, Absolute_X, &asl),
 
         // ASR
         OpCode(0x4a, "ASR", 1, 2, NoneAddressing, &asr),
@@ -76,16 +88,16 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0x4e, "ASR", 3, 6, Absolute, &asr),
         OpCode(0x5e, "ASR", 3, 7, Absolute_X, &asr),
 
-        // TAX
+        // TAX - Transfer Acuumulator to X
         OpCode(0xaa, "TAX", 1, 2, NoneAddressing, &tax),
 
-        // INX
+        // INX - Increment X Register
         OpCode(0xe8, "INX", 1, 2, NoneAddressing, &inx),
 
-        // INY
+        // INY - Increment Y Register
         OpCode(0xc8, "INY", 1, 2, NoneAddressing, &iny),
 
-        // LDA
+        // LDA - Load Accumulator
         OpCode(0xa9, "LDA", 2, 2, Immediate, &lda),
         OpCode(0xa5, "LDA", 2, 3, ZeroPage, &lda),
         OpCode(0xb5, "LDA", 2, 4, ZeroPage_X, &lda),
@@ -95,7 +107,7 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0xa1, "LDA", 2, 6, Indirect_X, &lda),
         OpCode(0xb1, "LDA", 2, 5, Indirect_Y, &lda), // +1 if page crossed
 
-        // STA
+        // STA - Store Accumulator
         OpCode(0x85, "STA", 2, 3, ZeroPage, &sta),
         OpCode(0x95, "STA", 2, 4, ZeroPage_X, &sta),
         OpCode(0x8d, "STA", 3, 4, Absolute, &sta),
@@ -104,17 +116,8 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0x81, "STA", 2, 6, Indirect_X, &sta),
         OpCode(0x91, "STA", 2, 6, Indirect_Y, &sta),
 
-        // ADC, add with carray
-        OpCode(0x69, "ADC", 2, 2, Immediate, &adc),
-        OpCode(0x65, "ADC", 2, 3, ZeroPage, &adc),
-        OpCode(0x75, "ADC", 2, 4, ZeroPage_X, &adc),
-        OpCode(0x6d, "ADC", 3, 4, Absolute, &adc),
-        OpCode(0x7d, "ADC", 3, 4, Absolute_X, &adc), // +1 if page crossed
-        OpCode(0x79, "ADC", 3, 4, Absolute_Y, &adc), // +1 if page crossed
-        OpCode(0x61, "ADC", 2, 6, Indirect_X, &adc),
-        OpCode(0x71, "ADC", 2, 5, Indirect_Y, &adc), // +1 if page crossed
 
-        // SBC, add with not carry
+        // SBC - Subtract with Carray
         OpCode(0xe9, "SBC", 2, 2, Immediate, &sbc),
         OpCode(0xe5, "SBC", 2, 3, ZeroPage, &sbc),
         OpCode(0xf5, "SBC", 2, 4, ZeroPage_X, &sbc),
@@ -136,7 +139,7 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         // BNE
         OpCode(0xD0, "BNE", 2, 2, NoneAddressing, &bne), // +1 if branch succeeds	+2 if to a new page
 
-        // BPL, Branch On Plus
+        // BPL - Branch on Plus
         OpCode(0xD0, "BPL", 2, 2, NoneAddressing, &bpl), // +1 if branch succeeds +2 if to a new page
     };
     return cpu_ops_code;
@@ -172,7 +175,7 @@ bool OpCode::lda(CPU& cpu, AddressingMode mode)
     }
     else
     {
-        uint16_t addr = cpu.get_operand_address(mode);
+        word addr = cpu.get_operand_address(mode);
         byte value = cpu.mem_read(addr);
 
         cpu.register_a = value;
@@ -184,7 +187,7 @@ bool OpCode::lda(CPU& cpu, AddressingMode mode)
 
 bool OpCode::sta(CPU& cpu, AddressingMode mode)
 {
-    uint16_t addr = cpu.get_operand_address(mode);
+    word addr = cpu.get_operand_address(mode);
     cpu.mem_write(addr, cpu.register_a);
     return true;
 }
@@ -216,7 +219,7 @@ bool OpCode::iny(CPU& cpu, AddressingMode mode)
 bool OpCode::adc(CPU& cpu, AddressingMode mode)
 {
     // adc(y) 定义为x+y+c
-    uint16_t address = cpu.get_operand_address(mode);
+    word address = cpu.get_operand_address(mode);
     byte value = cpu.mem_read(address);
 
     cpu.add_to_register_a(value);
@@ -226,7 +229,7 @@ bool OpCode::adc(CPU& cpu, AddressingMode mode)
 
 bool OpCode::sbc(CPU& cpu, AddressingMode mode)
 {
-    uint16_t address = cpu.get_operand_address(mode);
+    word address = cpu.get_operand_address(mode);
     byte value = cpu.mem_read(address);
     // sbc(y) 定义为x-y-(1-c)
     // 推导 x-y-(1-c) = x-y-1+c = x+(~y+1)-1+c = x+~y+c=add(~y)
@@ -241,7 +244,7 @@ bool OpCode::sbc(CPU& cpu, AddressingMode mode)
 
 bool OpCode::op_and(CPU& cpu, AddressingMode mode)
 {
-    uint16_t addr = cpu.get_operand_address(mode);
+    word addr = cpu.get_operand_address(mode);
     byte data = cpu.mem_read(addr);
     cpu.register_a = data & cpu.register_a;
     cpu.update_zero_and_negative_flags(cpu.register_a);
@@ -250,7 +253,7 @@ bool OpCode::op_and(CPU& cpu, AddressingMode mode)
 
 bool OpCode::op_eor(CPU& cpu, AddressingMode mode)
 {
-    uint16_t addr = cpu.get_operand_address(mode);
+    word addr = cpu.get_operand_address(mode);
     byte data = cpu.mem_read(addr);
     cpu.register_a = data ^ cpu.register_a;
     cpu.update_zero_and_negative_flags(cpu.register_a);
@@ -259,7 +262,7 @@ bool OpCode::op_eor(CPU& cpu, AddressingMode mode)
 
 bool OpCode::op_ora(CPU& cpu, AddressingMode mode)
 {
-    uint16_t addr = cpu.get_operand_address(mode);
+    word addr = cpu.get_operand_address(mode);
     byte data = cpu.mem_read(addr);
     cpu.register_a = data | cpu.register_a;
     cpu.update_zero_and_negative_flags(cpu.register_a);
@@ -268,29 +271,31 @@ bool OpCode::op_ora(CPU& cpu, AddressingMode mode)
 
 bool OpCode::asl(CPU& cpu, AddressingMode mode)
 {
-    uint16_t addr = cpu.get_operand_address(mode);
-    byte data = cpu.mem_read(addr);
-
-    int carry = data | 0x80;
-
-    if (data >> 7 == 1)
+    if (mode == Accumulator)
     {
-        cpu.status = cpu.status | 0x01;
+        byte data = cpu.register_a;
+        bool bOldCarry = data >> 7;
+        byte result = static_cast<byte>((data << 1) & 0xff);
+        cpu.update_carry_flag(bOldCarry);
+        cpu.update_zero_and_negative_flags(result);
+        cpu.register_a = result;
     }
     else
     {
-        cpu.status = cpu.status & 0xfe;
+        word addr = cpu.get_operand_address(mode);
+        byte data = cpu.mem_read(addr);
+        bool bOldCarry = data >> 7;
+        byte result = static_cast<byte>((data << 1) & 0xff);
+        cpu.update_carry_flag(bOldCarry);
+        cpu.update_zero_and_negative_flags(result);
+        cpu.mem_write(addr,result);
     }
-
-    data = data << 1;
-    cpu.mem_write(addr, data);
-    cpu.update_zero_and_negative_flags(data);
     return true;
 }
 
 bool OpCode::asr(CPU& cpu, AddressingMode mode)
 {
-    uint16_t addr = cpu.get_operand_address(mode);
+    word addr = cpu.get_operand_address(mode);
     byte data = cpu.mem_read(addr);
 
     int carry = data | 0x80;
@@ -316,7 +321,7 @@ bool OpCode::bcc(CPU& cpu, AddressingMode mode)
     if ((cpu.status & 1 << 0) == 0)
     {
         int8_t jump = cpu.mem_read(cpu.program_counter);
-        uint16_t jump_addr = cpu.program_counter + 1 + jump; // +1是因为要从下个指令的地址开始，加上这个跳转的数值
+        word jump_addr = cpu.program_counter + 1 + jump; // +1是因为要从下个指令的地址开始，加上这个跳转的数值
         cpu.program_counter = jump_addr;
     }
     return true;
@@ -328,7 +333,7 @@ bool OpCode::bcs(CPU& cpu, AddressingMode mode)
     if ((cpu.status & 1 << 0) == 1)
     {
         int8_t jump = cpu.mem_read(cpu.program_counter);
-        uint16_t jump_addr = cpu.program_counter + 1 + jump; // +1是因为要从下个指令的地址开始，加上这个跳转的数值
+        word jump_addr = cpu.program_counter + 1 + jump; // +1是因为要从下个指令的地址开始，加上这个跳转的数值
         cpu.program_counter = jump_addr;
     }
     return true;
@@ -340,7 +345,7 @@ bool OpCode::beq(CPU& cpu, AddressingMode mode)
     if ((cpu.status & 1 << 1) == 0)
     {
         int8_t jump = cpu.mem_read(cpu.program_counter);
-        uint16_t jump_addr = cpu.program_counter + 1 + jump; // +1是因为要从下个指令的地址开始，加上这个跳转的数值
+        word jump_addr = cpu.program_counter + 1 + jump; // +1是因为要从下个指令的地址开始，加上这个跳转的数值
         cpu.program_counter = jump_addr;
     }
     return true;
@@ -352,7 +357,7 @@ bool OpCode::bne(CPU& cpu, AddressingMode mode)
     if ((cpu.status & 1 << 1) == 1)
     {
         int8_t jump = cpu.mem_read(cpu.program_counter);
-        uint16_t jump_addr = cpu.program_counter + 1 + jump; // +1是因为要从下个指令的地址开始，加上这个跳转的数值
+        word jump_addr = cpu.program_counter + 1 + jump; // +1是因为要从下个指令的地址开始，加上这个跳转的数值
         cpu.program_counter = jump_addr;
     }
     return true;
@@ -363,7 +368,7 @@ bool OpCode::bpl(CPU& cpu, AddressingMode mode)
     if ((cpu.status & 1 << 7) == 0)
     {
         int8_t jump = cpu.mem_read(cpu.program_counter);
-        uint16_t jump_addr = cpu.program_counter + 1 + jump;
+        word jump_addr = cpu.program_counter + 1 + jump;
         cpu.program_counter = jump_addr;
     }
     return true;
@@ -374,7 +379,7 @@ bool OpCode::bmi(CPU& cpu, AddressingMode mode)
     if ((cpu.status & 1 << 7) == 1)
     {
         int8_t jump = cpu.mem_read(cpu.program_counter);
-        uint16_t jump_addr = cpu.program_counter + 1 + jump;
+        word jump_addr = cpu.program_counter + 1 + jump;
         cpu.program_counter = jump_addr;
     }
     return true;
@@ -385,7 +390,7 @@ bool OpCode::bvc(CPU& cpu, AddressingMode mode)
     if ((cpu.status & 1 << 6) == 0)
     {
         int8_t jump = cpu.mem_read(cpu.program_counter);
-        uint16_t jump_addr = cpu.program_counter + 1 + jump;
+        word jump_addr = cpu.program_counter + 1 + jump;
         cpu.program_counter = jump_addr;
     }
     return true;
@@ -396,7 +401,7 @@ bool OpCode::bvs(CPU& cpu, AddressingMode mode)
     if ((cpu.status & 1 << 6) == 1)
     {
         int8_t jump = cpu.mem_read(cpu.program_counter);
-        uint16_t jump_addr = cpu.program_counter + 1 + jump;
+        word jump_addr = cpu.program_counter + 1 + jump;
         cpu.program_counter = jump_addr;
     }
     return true;

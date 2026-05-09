@@ -49,24 +49,30 @@ private:
     void run();
     // 通用的设置寄存器的函数
     void update_zero_and_negative_flags(byte res);
-    uint16_t get_operand_address(AddressingMode& mode) const;
+    word get_operand_address(AddressingMode& mode) const;
     void add_to_register_a(byte value);
+    void update_carry_flag(bool flag);
 
     // 程序计数器
-    uint16_t program_counter;
+    word program_counter;
     byte stack_pointer;
 
     // 通用寄存器
-    byte register_a;
+    byte register_a; // ACC
     byte register_x;
     byte register_y;
 
     // 程序状态字寄存器, N V _ B D I Z C
-    //				   7 6 5 4 3 2 1 0
+    //				  7 6 5 4 3 2 1 0
     byte status;
 
     // 内存 address space,虚拟地址空间,CPU只有2KB的RAM，其他的都是用来做内存映射
     byte memory[MEM_SIZE];
+
+    // 常量定义
+    static constexpr byte CARRY_FLAG = 0x01;
+    static constexpr byte ZERO_FLAG = 0x02;
+    static constexpr byte NEG_Flag = 0x80;
 
 public: // public getter
     const byte& GetStatus() const { return status; }
@@ -76,4 +82,7 @@ public: // public getter
     void SetRegisterX(byte newRegisterX) { register_x = newRegisterX; }
     const byte& GetRegisterY() const { return register_y; }
     void SetRegisterY(byte newRegisterY) { register_y = newRegisterY; }
+    void ResetStatus() { status = 0; }
+    void SetPC(word newPC) { program_counter = newPC; }
+    const word& GetPC() const { return program_counter; }
 };
