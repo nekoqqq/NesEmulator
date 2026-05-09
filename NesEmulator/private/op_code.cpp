@@ -237,6 +237,9 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         // PHA - Push Accumulator
         OpCode(0x48, "PHA", 1, 3, Implied, &pha),
 
+        // PHP - Push Processor Status
+        OpCode(0x08, "PHA", 1, 3, Implied, &php),
+
 
     };
     return cpu_ops_code;
@@ -419,6 +422,19 @@ bool OpCode::lsr(CPU& cpu, AddressingMode mode)
 bool OpCode::pha(CPU& cpu, AddressingMode mode)
 {
     cpu.mem_write(cpu.stack_pointer + 0x0100, cpu.register_a);
+    cpu.stack_pointer--;
+
+    return true;
+}
+
+bool OpCode::php(CPU& cpu, AddressingMode mode)
+{
+    /*
+     *这是因为 6502 处理器的硬件行为规定：在将状态寄存器压栈时（无论是 PHP 指令还是硬件中断），
+     *压入栈中的状态字节的第 4 位（B 标志）总是被设置为 1，
+     *而当前 CPU 的状态寄存器中的该位实际上是不存在的（或者说是无意义的，通常为 0）
+     */
+    cpu.mem_write(cpu.stack_pointer + 0x0100, cpu.status | CPU::BREAK_FLAG);
     cpu.stack_pointer--;
 
     return true;

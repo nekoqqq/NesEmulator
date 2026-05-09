@@ -38,6 +38,7 @@ void test_lsr();
 void test_nop();
 void test_ora();
 void test_pha();
+void test_php();
 
 int main()
 {
@@ -78,4 +79,5 @@ int main()
     test_nop();
     test_ora();
     test_pha();
+    test_php();
 }

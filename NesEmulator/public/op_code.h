@@ -86,5 +86,6 @@ struct OpCode
     
     static bool lsr(CPU&cpu, AddressingMode mode);
     static bool pha(CPU&cpu, AddressingMode mode);
+    static bool php(CPU&cpu, AddressingMode mode);
     
 };
