@@ -218,6 +218,7 @@
     <ClCompile Include="private\tests\test_bvc.cpp" />
     <ClCompile Include="private\tests\test_bvs.cpp" />
     <ClCompile Include="private\tests\test_clc.cpp" />
+    <ClCompile Include="private\tests\test_cld.cpp" />
     <ClCompile Include="public\platform_common.h">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>

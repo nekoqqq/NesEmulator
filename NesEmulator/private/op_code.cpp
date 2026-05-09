@@ -157,6 +157,9 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         // CLC - Clear Carry Flag
         OpCode(0x18, "CLC", 1, 2, Implied, &clc),
 
+        // CLD - Clear Decimal Mode
+        OpCode(0xD8, "CLD", 1, 2, Implied, &cld)
+
     };
     return cpu_ops_code;
 }();
@@ -469,5 +472,11 @@ bool OpCode::bvs(CPU& cpu, AddressingMode mode)
 bool OpCode::clc(CPU& cpu, AddressingMode mode)
 {
     cpu.SetFlag(CPU::CARRY_FLAG, false);
+    return true;
+}
+
+bool OpCode::cld(CPU& cpu, AddressingMode mode)
+{
+    cpu.SetFlag(CPU::DECIMAL_FLAG, false);
     return true;
 }

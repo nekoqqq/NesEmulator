@@ -64,4 +64,5 @@ struct OpCode
     static bool bvs(CPU& cpu, AddressingMode mode);
     
     static bool clc(CPU& cpu, AddressingMode mode);
+    static bool cld(CPU& cpu, AddressingMode mode);
 };

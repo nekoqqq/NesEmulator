@@ -16,6 +16,7 @@ void test_brk();
 void test_bvc();
 void test_bvs();
 void test_clc();
+void test_cld();
 
 int main()
 {
@@ -33,4 +34,7 @@ int main()
     test_bvc();
     test_bvs();
     test_clc();
+    // todo: 增加op码和助记符的测试文件
+    test_cld();
+    
 }
