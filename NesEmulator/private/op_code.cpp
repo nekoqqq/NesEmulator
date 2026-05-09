@@ -234,6 +234,10 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0x4E, "LSR", 3, 6, Absolute, &lsr),
         OpCode(0x5E, "LSR", 3, 7, Absolute_X, &lsr),
 
+        // PHA - Push Accumulator
+        OpCode(0x48, "PHA", 1, 3, Implied, &pha),
+
+
     };
     return cpu_ops_code;
 }();
@@ -409,6 +413,14 @@ bool OpCode::lsr(CPU& cpu, AddressingMode mode)
         cpu.SetFlag(CPU::ZERO_FLAG, result == 0);
         cpu.SetFlag(CPU::NEGATIVE_FLAG, false);
     }
+    return true;
+}
+
+bool OpCode::pha(CPU& cpu, AddressingMode mode)
+{
+    cpu.mem_write(cpu.stack_pointer + 0x0100, cpu.register_a);
+    cpu.stack_pointer--;
+
     return true;
 }
 
