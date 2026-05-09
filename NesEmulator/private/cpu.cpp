@@ -34,9 +34,9 @@ void CPU::mem_write(word addr, byte data)
 
 word CPU::mem_read_u16(word pos) const
 {
-    word lo = mem_read(pos);
-    word hi = mem_read(pos + 1);
-    return hi << 8 | lo;
+    byte lo = mem_read(pos);
+    byte hi = mem_read(pos + 1);
+    return static_cast<word>((hi << 8) | lo);
 }
 
 void CPU::mem_write_u16(word pos, word data)
