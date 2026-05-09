@@ -5,7 +5,7 @@
 #include "../../public/op_code.h"
 
 static void check_flags(const CPU& cpu, bool carry, bool zero, bool negative) {
-    byte status = cpu.GetStatus();
+    byte status = cpu.get_status();
     assert(((status >> 0) & 1) == carry);
     assert(((status >> 1) & 1) == zero);
     assert(((status >> 7) & 1) == negative);
@@ -17,30 +17,30 @@ static void test_asl_accumulator()
     // 测试1：普通左移
     {
         CPU cpu;
-        cpu.SetRegisterA(0x12);
-        cpu.ResetStatus();
+        cpu.set_a(0x12);
+        cpu.reset_stats();
         OpCode::asl(cpu, Accumulator);
-        assert(cpu.GetRegisterA() == 0x24);
+        assert(cpu.get_a() == 0x24);
         check_flags(cpu, false, false, false);
         std::cout << "[ASL] Accumulator test 1 passed\n";
     }
     // 测试2：进位 + 结果为零
     {
         CPU cpu;
-        cpu.SetRegisterA(0x80);
-        cpu.ResetStatus();
+        cpu.set_a(0x80);
+        cpu.reset_stats();
         OpCode::asl(cpu, Accumulator);
-        assert(cpu.GetRegisterA() == 0x00);
+        assert(cpu.get_a() == 0x00);
         check_flags(cpu, true, true, false);
         std::cout << "[ASL] Accumulator test 2 passed\n";
     }
     // 测试3：负标志
     {
         CPU cpu;
-        cpu.SetRegisterA(0x40);
-        cpu.ResetStatus();
+        cpu.set_a(0x40);
+        cpu.reset_stats();
         OpCode::asl(cpu, Accumulator);
-        assert(cpu.GetRegisterA() == 0x80);
+        assert(cpu.get_a() == 0x80);
         check_flags(cpu, false, false, true);
         std::cout << "[ASL] Accumulator test 3 passed\n";
     }
@@ -54,9 +54,9 @@ static void test_asl_zero_page()
 
     // 测试1：普通移位
     cpu.mem_write(addr, 0x12);
-    cpu.SetPC(0x1000);
-    cpu.mem_write_u16(cpu.GetPC(), addr); // 写入零页地址作为操作数
-    cpu.ResetStatus();
+    cpu.set_pc(0x1000);
+    cpu.mem_write_word(cpu.get_pc(), addr); // 写入零页地址作为操作数
+    cpu.reset_stats();
     OpCode::asl(cpu, ZeroPage);
     assert(cpu.mem_read(addr) == 0x24);
     check_flags(cpu, false, false, false);
@@ -64,9 +64,9 @@ static void test_asl_zero_page()
 
     // 测试2：进位 + 结果为零
     cpu.mem_write(addr, 0x80);
-    cpu.SetPC(0x1000);
-    cpu.mem_write_u16(cpu.GetPC(), addr);
-    cpu.ResetStatus();
+    cpu.set_pc(0x1000);
+    cpu.mem_write_word(cpu.get_pc(), addr);
+    cpu.reset_stats();
     OpCode::asl(cpu, ZeroPage);
     assert(cpu.mem_read(addr) == 0x00);
     check_flags(cpu, true, true, false);
@@ -74,9 +74,9 @@ static void test_asl_zero_page()
 
     // 测试3：负标志
     cpu.mem_write(addr, 0x40);
-    cpu.SetPC(0x1000);
-    cpu.mem_write_u16(cpu.GetPC(), addr);
-    cpu.ResetStatus();
+    cpu.set_pc(0x1000);
+    cpu.mem_write_word(cpu.get_pc(), addr);
+    cpu.reset_stats();
     OpCode::asl(cpu, ZeroPage);
     assert(cpu.mem_read(addr) == 0x80);
     check_flags(cpu, false, false, true);
@@ -89,12 +89,12 @@ static void test_asl_zero_page_x()
     // 测试1：普通，基址 0x10，X=5 -> 0x15
     {
         CPU cpu;
-        cpu.SetRegisterX(5);
+        cpu.set_x(5);
         word target = 0x15;
         cpu.mem_write(target, 0x12);
-        cpu.SetPC(0x1000);
-        cpu.mem_write_u16(cpu.GetPC(), 0x10); // 操作数基址
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write_word(cpu.get_pc(), 0x10); // 操作数基址
+        cpu.reset_stats();
         OpCode::asl(cpu, ZeroPage_X);
         assert(cpu.mem_read(target) == 0x24);
         check_flags(cpu, false, false, false);
@@ -103,11 +103,11 @@ static void test_asl_zero_page_x()
     // 测试2：零页绕回 (0xFF + 1 -> 0x00)
     {
         CPU cpu;
-        cpu.SetRegisterX(1);
+        cpu.set_x(1);
         cpu.mem_write(0x00, 0x80);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0xFF);
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0xFF);
+        cpu.reset_stats();
         OpCode::asl(cpu, ZeroPage_X);
         assert(cpu.mem_read(0x00) == 0x00);
         check_flags(cpu, true, true, false);
@@ -116,11 +116,11 @@ static void test_asl_zero_page_x()
     // 测试3：负标志
     {
         CPU cpu;
-        cpu.SetRegisterX(2);
+        cpu.set_x(2);
         cpu.mem_write(0x12, 0x40); // 基址 0x10, X=2 -> 0x12
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0x10);
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0x10);
+        cpu.reset_stats();
         OpCode::asl(cpu, ZeroPage_X);
         assert(cpu.mem_read(0x12) == 0x80);
         check_flags(cpu, false, false, true);
@@ -137,9 +137,9 @@ static void test_asl_absolute()
     {
         CPU cpu;
         cpu.mem_write(addr, 0x12);
-        cpu.SetPC(0x2000);
-        cpu.mem_write_u16(cpu.GetPC(), addr); // 操作数（16位地址）
-        cpu.ResetStatus();
+        cpu.set_pc(0x2000);
+        cpu.mem_write_word(cpu.get_pc(), addr); // 操作数（16位地址）
+        cpu.reset_stats();
         OpCode::asl(cpu, Absolute);
         assert(cpu.mem_read(addr) == 0x24);
         check_flags(cpu, false, false, false);
@@ -149,9 +149,9 @@ static void test_asl_absolute()
     {
         CPU cpu;
         cpu.mem_write(addr, 0x80);
-        cpu.SetPC(0x2000);
-        cpu.mem_write_u16(cpu.GetPC(), addr);
-        cpu.ResetStatus();
+        cpu.set_pc(0x2000);
+        cpu.mem_write_word(cpu.get_pc(), addr);
+        cpu.reset_stats();
         OpCode::asl(cpu, Absolute);
         assert(cpu.mem_read(addr) == 0x00);
         check_flags(cpu, true, true, false);
@@ -161,9 +161,9 @@ static void test_asl_absolute()
     {
         CPU cpu;
         cpu.mem_write(addr, 0x40);
-        cpu.SetPC(0x2000);
-        cpu.mem_write_u16(cpu.GetPC(), addr);
-        cpu.ResetStatus();
+        cpu.set_pc(0x2000);
+        cpu.mem_write_word(cpu.get_pc(), addr);
+        cpu.reset_stats();
         OpCode::asl(cpu, Absolute);
         assert(cpu.mem_read(addr) == 0x80);
         check_flags(cpu, false, false, true);
@@ -180,11 +180,11 @@ static void test_asl_absolute_x()
         word base = 0x1200;
         byte x_val = 0x34;
         word target = base + x_val; // 0x1234
-        cpu.SetRegisterX(x_val);
+        cpu.set_x(x_val);
         cpu.mem_write(target, 0x12);
-        cpu.SetPC(0x3000);
-        cpu.mem_write_u16(cpu.GetPC(), base); // 操作数基址
-        cpu.ResetStatus();
+        cpu.set_pc(0x3000);
+        cpu.mem_write_word(cpu.get_pc(), base); // 操作数基址
+        cpu.reset_stats();
         OpCode::asl(cpu, Absolute_X);
         assert(cpu.mem_read(target) == 0x24);
         check_flags(cpu, false, false, false);
@@ -196,11 +196,11 @@ static void test_asl_absolute_x()
         word base = 0x12FF;
         byte x_val = 2;
         word target = base + x_val; // 0x1301
-        cpu.SetRegisterX(x_val);
+        cpu.set_x(x_val);
         cpu.mem_write(target, 0x80);
-        cpu.SetPC(0x3000);
-        cpu.mem_write_u16(cpu.GetPC(), base);
-        cpu.ResetStatus();
+        cpu.set_pc(0x3000);
+        cpu.mem_write_word(cpu.get_pc(), base);
+        cpu.reset_stats();
         OpCode::asl(cpu, Absolute_X);
         assert(cpu.mem_read(target) == 0x00);
         check_flags(cpu, true, true, false);
@@ -212,11 +212,11 @@ static void test_asl_absolute_x()
         word base = 0x1000;
         byte x_val = 0x20;
         word target = base + x_val; // 0x1020
-        cpu.SetRegisterX(x_val);
+        cpu.set_x(x_val);
         cpu.mem_write(target, 0x40);
-        cpu.SetPC(0x3000);
-        cpu.mem_write_u16(cpu.GetPC(), base);
-        cpu.ResetStatus();
+        cpu.set_pc(0x3000);
+        cpu.mem_write_word(cpu.get_pc(), base);
+        cpu.reset_stats();
         OpCode::asl(cpu, Absolute_X);
         assert(cpu.mem_read(target) == 0x80);
         check_flags(cpu, false, false, true);

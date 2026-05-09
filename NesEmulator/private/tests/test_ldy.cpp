@@ -5,7 +5,7 @@
 #include "../../public/op_code.h"
 
 static void check_flags(const CPU& cpu, bool zero, bool negative) {
-    byte status = cpu.GetStatus();
+    byte status = cpu.get_status();
     assert(((status >> 1) & 1) == zero);
     assert(((status >> 7) & 1) == negative);
 }
@@ -14,31 +14,31 @@ static void check_flags(const CPU& cpu, bool zero, bool negative) {
 static void test_ldy_immediate() {
     {
         CPU cpu;
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0x42);
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0x42);
+        cpu.reset_stats();
         OpCode::ldy(cpu, Immediate);
-        assert(cpu.GetRegisterY() == 0x42);
+        assert(cpu.get_y() == 0x42);
         check_flags(cpu, false, false);
         std::cout << "[LDY] Immediate test 1 passed\n";
     }
     {
         CPU cpu;
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0x00);
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0x00);
+        cpu.reset_stats();
         OpCode::ldy(cpu, Immediate);
-        assert(cpu.GetRegisterY() == 0x00);
+        assert(cpu.get_y() == 0x00);
         check_flags(cpu, true, false);
         std::cout << "[LDY] Immediate test 2 (zero) passed\n";
     }
     {
         CPU cpu;
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0x80);
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0x80);
+        cpu.reset_stats();
         OpCode::ldy(cpu, Immediate);
-        assert(cpu.GetRegisterY() == 0x80);
+        assert(cpu.get_y() == 0x80);
         check_flags(cpu, false, true);
         std::cout << "[LDY] Immediate test 3 (negative) passed\n";
     }
@@ -50,22 +50,22 @@ static void test_ldy_zero_page() {
     {
         CPU cpu;
         cpu.mem_write(addr, 0x55);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), static_cast<byte>(addr));
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), static_cast<byte>(addr));
+        cpu.reset_stats();
         OpCode::ldy(cpu, ZeroPage);
-        assert(cpu.GetRegisterY() == 0x55);
+        assert(cpu.get_y() == 0x55);
         check_flags(cpu, false, false);
         std::cout << "[LDY] ZeroPage test 1 passed\n";
     }
     {
         CPU cpu;
         cpu.mem_write(addr, 0x00);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), static_cast<byte>(addr));
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), static_cast<byte>(addr));
+        cpu.reset_stats();
         OpCode::ldy(cpu, ZeroPage);
-        assert(cpu.GetRegisterY() == 0x00);
+        assert(cpu.get_y() == 0x00);
         check_flags(cpu, true, false);
         std::cout << "[LDY] ZeroPage test 2 (zero) passed\n";
     }
@@ -78,26 +78,26 @@ static void test_ldy_zero_page_x() {
     word target = (base + x_val) & 0xFF; // 0x15
     {
         CPU cpu;
-        cpu.SetRegisterX(x_val);
+        cpu.set_x(x_val);
         cpu.mem_write(target, 0xAA);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), base);
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), base);
+        cpu.reset_stats();
         OpCode::ldy(cpu, ZeroPage_X);
-        assert(cpu.GetRegisterY() == 0xAA);
+        assert(cpu.get_y() == 0xAA);
         check_flags(cpu, false, true);
         std::cout << "[LDY] ZeroPageX test 1 passed\n";
     }
     // 绕回测试：0xFF + 1 = 0x00
     {
         CPU cpu;
-        cpu.SetRegisterX(1);
+        cpu.set_x(1);
         cpu.mem_write(0x00, 0x80);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0xFF);
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0xFF);
+        cpu.reset_stats();
         OpCode::ldy(cpu, ZeroPage_X);
-        assert(cpu.GetRegisterY() == 0x80);
+        assert(cpu.get_y() == 0x80);
         check_flags(cpu, false, true);
         std::cout << "[LDY] ZeroPageX test 2 (wrap) passed\n";
     }
@@ -109,11 +109,11 @@ static void test_ldy_absolute() {
     {
         CPU cpu;
         cpu.mem_write(addr, 0x33);
-        cpu.SetPC(0x2000);
-        cpu.mem_write_u16(cpu.GetPC(), addr);
-        cpu.ResetStatus();
+        cpu.set_pc(0x2000);
+        cpu.mem_write_word(cpu.get_pc(), addr);
+        cpu.reset_stats();
         OpCode::ldy(cpu, Absolute);
-        assert(cpu.GetRegisterY() == 0x33);
+        assert(cpu.get_y() == 0x33);
         check_flags(cpu, false, false);
         std::cout << "[LDY] Absolute test 1 passed\n";
     }
@@ -126,13 +126,13 @@ static void test_ldy_absolute_x() {
     word target = base + x_val; // 0x1234
     {
         CPU cpu;
-        cpu.SetRegisterX(x_val);
+        cpu.set_x(x_val);
         cpu.mem_write(target, 0x7F);
-        cpu.SetPC(0x3000);
-        cpu.mem_write_u16(cpu.GetPC(), base);
-        cpu.ResetStatus();
+        cpu.set_pc(0x3000);
+        cpu.mem_write_word(cpu.get_pc(), base);
+        cpu.reset_stats();
         OpCode::ldy(cpu, Absolute_X);
-        assert(cpu.GetRegisterY() == 0x7F);
+        assert(cpu.get_y() == 0x7F);
         check_flags(cpu, false, false);
         std::cout << "[LDY] AbsoluteX test 1 passed\n";
     }
@@ -142,13 +142,13 @@ static void test_ldy_absolute_x() {
         word base2 = 0x12FF;
         byte x_val2 = 2;
         word target2 = base2 + x_val2; // 0x1301
-        cpu.SetRegisterX(x_val2);
+        cpu.set_x(x_val2);
         cpu.mem_write(target2, 0x01);
-        cpu.SetPC(0x3000);
-        cpu.mem_write_u16(cpu.GetPC(), base2);
-        cpu.ResetStatus();
+        cpu.set_pc(0x3000);
+        cpu.mem_write_word(cpu.get_pc(), base2);
+        cpu.reset_stats();
         OpCode::ldy(cpu, Absolute_X);
-        assert(cpu.GetRegisterY() == 0x01);
+        assert(cpu.get_y() == 0x01);
         check_flags(cpu, false, false);
         std::cout << "[LDY] AbsoluteX test 2 (page cross) passed\n";
     }

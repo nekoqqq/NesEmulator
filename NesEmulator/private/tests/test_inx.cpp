@@ -5,7 +5,7 @@
 #include "../../public/op_code.h"
 
 static void check_flags(const CPU& cpu, bool zero, bool negative) {
-    byte status = cpu.GetStatus();
+    byte status = cpu.get_status();
     assert(((status >> 1) & 1) == zero);
     assert(((status >> 7) & 1) == negative);
 }
@@ -15,40 +15,40 @@ static void test_inx_implied() {
     // 测试1：0x12 -> 0x13
     {
         CPU cpu;
-        cpu.SetRegisterX(0x12);
-        cpu.ResetStatus();
+        cpu.set_x(0x12);
+        cpu.reset_stats();
         OpCode::inx(cpu, Implied);
-        assert(cpu.GetRegisterX() == 0x13);
+        assert(cpu.get_x() == 0x13);
         check_flags(cpu, false, false);
         std::cout << "[INX] Test 1 passed\n";
     }
     // 测试2：0xFF -> 0x00, Z=1
     {
         CPU cpu;
-        cpu.SetRegisterX(0xFF);
-        cpu.ResetStatus();
+        cpu.set_x(0xFF);
+        cpu.reset_stats();
         OpCode::inx(cpu, Implied);
-        assert(cpu.GetRegisterX() == 0x00);
+        assert(cpu.get_x() == 0x00);
         check_flags(cpu, true, false);
         std::cout << "[INX] Test 2 passed\n";
     }
     // 测试3：0x7F -> 0x80, N=1
     {
         CPU cpu;
-        cpu.SetRegisterX(0x7F);
-        cpu.ResetStatus();
+        cpu.set_x(0x7F);
+        cpu.reset_stats();
         OpCode::inx(cpu, Implied);
-        assert(cpu.GetRegisterX() == 0x80);
+        assert(cpu.get_x() == 0x80);
         check_flags(cpu, false, true);
         std::cout << "[INX] Test 3 passed\n";
     }
     // 测试4：0x80 -> 0x81, N=1
     {
         CPU cpu;
-        cpu.SetRegisterX(0x80);
-        cpu.ResetStatus();
+        cpu.set_x(0x80);
+        cpu.reset_stats();
         OpCode::inx(cpu, Implied);
-        assert(cpu.GetRegisterX() == 0x81);
+        assert(cpu.get_x() == 0x81);
         check_flags(cpu, false, true);
         std::cout << "[INX] Test 4 passed\n";
     }

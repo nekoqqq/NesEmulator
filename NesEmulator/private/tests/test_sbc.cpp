@@ -4,7 +4,7 @@
 #include "../../public/op_code.h"
 
 static void check_flags(const CPU& cpu, bool carry, bool zero, bool overflow, bool negative) {
-    byte status = cpu.GetStatus();
+    byte status = cpu.get_status();
     assert(((status >> 0) & 1) == carry);
     assert(((status >> 1) & 1) == zero);
     assert(((status >> 6) & 1) == overflow);
@@ -16,56 +16,56 @@ static void test_sbc_immediate() {
     // 测试1：无借位，0x50 - 0x20 = 0x30
     {
         CPU cpu;
-        cpu.SetRegisterA(0x50);
-        cpu.SetFlag(CPU::CARRY_FLAG, true);   // C=1 表示无借位
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0x20);
-        cpu.ResetStatus();
-        cpu.SetFlag(CPU::CARRY_FLAG, true);
+        cpu.set_a(0x50);
+        cpu.set_flag(CPU::CARRY_FLAG, true);   // C=1 表示无借位
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0x20);
+        cpu.reset_stats();
+        cpu.set_flag(CPU::CARRY_FLAG, true);
         OpCode::sbc(cpu, Immediate);
-        assert(cpu.GetRegisterA() == 0x30);
+        assert(cpu.get_a() == 0x30);
         check_flags(cpu, true, false, false, false);
         std::cout << "[SBC] Immediate test 1 passed\n";
     }
     // 测试2：有借位，0x20 - 0x30 = 0xF0, C=0, N=1
     {
         CPU cpu;
-        cpu.SetRegisterA(0x20);
-        cpu.SetFlag(CPU::CARRY_FLAG, true);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0x30);
-        cpu.ResetStatus();
-        cpu.SetFlag(CPU::CARRY_FLAG, true);
+        cpu.set_a(0x20);
+        cpu.set_flag(CPU::CARRY_FLAG, true);
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0x30);
+        cpu.reset_stats();
+        cpu.set_flag(CPU::CARRY_FLAG, true);
         OpCode::sbc(cpu, Immediate);
-        assert(cpu.GetRegisterA() == 0xF0);
+        assert(cpu.get_a() == 0xF0);
         check_flags(cpu, false, false, false, true);
         std::cout << "[SBC] Immediate test 2 passed\n";
     }
     // 测试3：产生0，C=1, Z=1
     {
         CPU cpu;
-        cpu.SetRegisterA(0x20);
-        cpu.SetFlag(CPU::CARRY_FLAG, true);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0x20);
-        cpu.ResetStatus();
-        cpu.SetFlag(CPU::CARRY_FLAG, true);
+        cpu.set_a(0x20);
+        cpu.set_flag(CPU::CARRY_FLAG, true);
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0x20);
+        cpu.reset_stats();
+        cpu.set_flag(CPU::CARRY_FLAG, true);
         OpCode::sbc(cpu, Immediate);
-        assert(cpu.GetRegisterA() == 0x00);
+        assert(cpu.get_a() == 0x00);
         check_flags(cpu, true, true, false, false);
         std::cout << "[SBC] Immediate test 3 passed\n";
     }
     // 测试4：溢出，0x80 - 0x01 = 0x7F, C=1, V=1? 实际上 -128 - 1 = -129 超出8位有符号，产生溢出
     {
         CPU cpu;
-        cpu.SetRegisterA(0x80);
-        cpu.SetFlag(CPU::CARRY_FLAG, true);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0x01);
-        cpu.ResetStatus();
-        cpu.SetFlag(CPU::CARRY_FLAG, true);
+        cpu.set_a(0x80);
+        cpu.set_flag(CPU::CARRY_FLAG, true);
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0x01);
+        cpu.reset_stats();
+        cpu.set_flag(CPU::CARRY_FLAG, true);
         OpCode::sbc(cpu, Immediate);
-        assert(cpu.GetRegisterA() == 0x7F);
+        assert(cpu.get_a() == 0x7F);
         check_flags(cpu, true, false, true, false);
         std::cout << "[SBC] Immediate test 4 (overflow) passed\n";
     }
@@ -76,15 +76,15 @@ static void test_sbc_zero_page() {
     word addr = 0x10;
     {
         CPU cpu;
-        cpu.SetRegisterA(0x50);
+        cpu.set_a(0x50);
         cpu.mem_write(addr, 0x20);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), static_cast<byte>(addr));
-        cpu.SetFlag(CPU::CARRY_FLAG, true);
-        cpu.ResetStatus();
-        cpu.SetFlag(CPU::CARRY_FLAG, true);
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), static_cast<byte>(addr));
+        cpu.set_flag(CPU::CARRY_FLAG, true);
+        cpu.reset_stats();
+        cpu.set_flag(CPU::CARRY_FLAG, true);
         OpCode::sbc(cpu, ZeroPage);
-        assert(cpu.GetRegisterA() == 0x30);
+        assert(cpu.get_a() == 0x30);
         check_flags(cpu, true, false, false, false);
         std::cout << "[SBC] ZeroPage test 1 passed\n";
     }
@@ -97,16 +97,16 @@ static void test_sbc_zero_page_x() {
     word target = (base + x_val) & 0xFF;
     {
         CPU cpu;
-        cpu.SetRegisterA(0x30);
-        cpu.SetRegisterX(x_val);
+        cpu.set_a(0x30);
+        cpu.set_x(x_val);
         cpu.mem_write(target, 0x10);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), base);
-        cpu.SetFlag(CPU::CARRY_FLAG, true);
-        cpu.ResetStatus();
-        cpu.SetFlag(CPU::CARRY_FLAG, true);
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), base);
+        cpu.set_flag(CPU::CARRY_FLAG, true);
+        cpu.reset_stats();
+        cpu.set_flag(CPU::CARRY_FLAG, true);
         OpCode::sbc(cpu, ZeroPage_X);
-        assert(cpu.GetRegisterA() == 0x20);
+        assert(cpu.get_a() == 0x20);
         check_flags(cpu, true, false, false, false);
         std::cout << "[SBC] ZeroPageX test 1 passed\n";
     }
@@ -117,15 +117,15 @@ static void test_sbc_absolute() {
     word addr = 0x1234;
     {
         CPU cpu;
-        cpu.SetRegisterA(0x40);
+        cpu.set_a(0x40);
         cpu.mem_write(addr, 0x10);
-        cpu.SetPC(0x2000);
-        cpu.mem_write_u16(cpu.GetPC(), addr);
-        cpu.SetFlag(CPU::CARRY_FLAG, true);
-        cpu.ResetStatus();
-        cpu.SetFlag(CPU::CARRY_FLAG, true);
+        cpu.set_pc(0x2000);
+        cpu.mem_write_word(cpu.get_pc(), addr);
+        cpu.set_flag(CPU::CARRY_FLAG, true);
+        cpu.reset_stats();
+        cpu.set_flag(CPU::CARRY_FLAG, true);
         OpCode::sbc(cpu, Absolute);
-        assert(cpu.GetRegisterA() == 0x30);
+        assert(cpu.get_a() == 0x30);
         check_flags(cpu, true, false, false, false);
         std::cout << "[SBC] Absolute test 1 passed\n";
     }
@@ -138,16 +138,16 @@ static void test_sbc_absolute_x() {
     word target = base + x_val;
     {
         CPU cpu;
-        cpu.SetRegisterA(0x50);
-        cpu.SetRegisterX(x_val);
+        cpu.set_a(0x50);
+        cpu.set_x(x_val);
         cpu.mem_write(target, 0x20);
-        cpu.SetPC(0x3000);
-        cpu.mem_write_u16(cpu.GetPC(), base);
-        cpu.SetFlag(CPU::CARRY_FLAG, true);
-        cpu.ResetStatus();
-        cpu.SetFlag(CPU::CARRY_FLAG, true);
+        cpu.set_pc(0x3000);
+        cpu.mem_write_word(cpu.get_pc(), base);
+        cpu.set_flag(CPU::CARRY_FLAG, true);
+        cpu.reset_stats();
+        cpu.set_flag(CPU::CARRY_FLAG, true);
         OpCode::sbc(cpu, Absolute_X);
-        assert(cpu.GetRegisterA() == 0x30);
+        assert(cpu.get_a() == 0x30);
         check_flags(cpu, true, false, false, false);
         std::cout << "[SBC] AbsoluteX test 1 passed\n";
     }
@@ -160,16 +160,16 @@ static void test_sbc_absolute_y() {
     word target = base + y_val;
     {
         CPU cpu;
-        cpu.SetRegisterA(0x70);
-        cpu.SetRegisterY(y_val);
+        cpu.set_a(0x70);
+        cpu.set_y(y_val);
         cpu.mem_write(target, 0x20);
-        cpu.SetPC(0x3000);
-        cpu.mem_write_u16(cpu.GetPC(), base);
-        cpu.SetFlag(CPU::CARRY_FLAG, true);
-        cpu.ResetStatus();
-        cpu.SetFlag(CPU::CARRY_FLAG, true);
+        cpu.set_pc(0x3000);
+        cpu.mem_write_word(cpu.get_pc(), base);
+        cpu.set_flag(CPU::CARRY_FLAG, true);
+        cpu.reset_stats();
+        cpu.set_flag(CPU::CARRY_FLAG, true);
         OpCode::sbc(cpu, Absolute_Y);
-        assert(cpu.GetRegisterA() == 0x50);
+        assert(cpu.get_a() == 0x50);
         check_flags(cpu, true, false, false, false);
         std::cout << "[SBC] AbsoluteY test 1 passed\n";
     }
@@ -185,15 +185,15 @@ static void test_sbc_indirect_x() {
     cpu.mem_write(pointer, target & 0xFF);
     cpu.mem_write(pointer + 1, target >> 8);
     cpu.mem_write(target, 0x30);
-    cpu.SetRegisterA(0x50);
-    cpu.SetRegisterX(x_val);
-    cpu.SetPC(0x1000);
-    cpu.mem_write(cpu.GetPC(), zp_base);
-    cpu.SetFlag(CPU::CARRY_FLAG, true);
-    cpu.ResetStatus();
-    cpu.SetFlag(CPU::CARRY_FLAG, true);
+    cpu.set_a(0x50);
+    cpu.set_x(x_val);
+    cpu.set_pc(0x1000);
+    cpu.mem_write(cpu.get_pc(), zp_base);
+    cpu.set_flag(CPU::CARRY_FLAG, true);
+    cpu.reset_stats();
+    cpu.set_flag(CPU::CARRY_FLAG, true);
     OpCode::sbc(cpu, Indirect_X);
-    assert(cpu.GetRegisterA() == 0x20);
+    assert(cpu.get_a() == 0x20);
     check_flags(cpu, true, false, false, false);
     std::cout << "[SBC] IndirectX test 1 passed\n";
 }
@@ -208,15 +208,15 @@ static void test_sbc_indirect_y() {
     cpu.mem_write(zp_base, base_addr & 0xFF);
     cpu.mem_write(zp_base + 1, base_addr >> 8);
     cpu.mem_write(target, 0x20);
-    cpu.SetRegisterA(0x40);
-    cpu.SetRegisterY(y_val);
-    cpu.SetPC(0x1000);
-    cpu.mem_write(cpu.GetPC(), zp_base);
-    cpu.SetFlag(CPU::CARRY_FLAG, true);
-    cpu.ResetStatus();
-    cpu.SetFlag(CPU::CARRY_FLAG, true);
+    cpu.set_a(0x40);
+    cpu.set_y(y_val);
+    cpu.set_pc(0x1000);
+    cpu.mem_write(cpu.get_pc(), zp_base);
+    cpu.set_flag(CPU::CARRY_FLAG, true);
+    cpu.reset_stats();
+    cpu.set_flag(CPU::CARRY_FLAG, true);
     OpCode::sbc(cpu, Indirect_D_Y);
-    assert(cpu.GetRegisterA() == 0x20);
+    assert(cpu.get_a() == 0x20);
     check_flags(cpu, true, false, false, false);
     std::cout << "[SBC] IndirectY test 1 passed\n";
 }

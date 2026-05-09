@@ -30,10 +30,10 @@ public:
     byte mem_read(word addr) const;
     void mem_write(word addr, byte data);
     // 给一个16位的地址，需要读取连续两个字节的数据，也就是连续两行的数据，这两行的数据再根据小端的方式拼接
-    word mem_read_u16(word pos) const;
+    word mem_read_word(word pos) const;
     // 给一个16位的地址，写入一个16位的操作数，用小端的方式，先写低八位的数据，再写高8位的数据
     // 记住，内存总共64KB大小，总共有64K行，每行都是8位，存一个Byte，数据就存在这些cell里面
-    void mem_write_u16(word pos, uint16_t data);
+    void mem_write_word(word pos, uint16_t data);
 
     // 常量定义
     // 程序状态字寄存器, N V _ B D I Z C
@@ -80,21 +80,21 @@ private:
     byte memory[MEM_SIZE];
 
 public: // public getter
-    const byte& GetStatus() const { return status; }
-    const byte& GetRegisterA() const { return register_a; }
-    void SetRegisterA(byte newRegisterA) { register_a = newRegisterA; }
-    const byte& GetRegisterX() const { return register_x; }
-    void SetRegisterX(byte newRegisterX) { register_x = newRegisterX; }
-    const byte& GetRegisterY() const { return register_y; }
-    void SetRegisterY(byte newRegisterY) { register_y = newRegisterY; }
-    void ResetStatus() { status = 0; }
-    void SetPC(word newPC) { program_counter = newPC; }
-    const word& GetPC() const { return program_counter; }
-    void SetStatus(byte value) { status = value; }
-    const byte& GetStackPointer() const { return stack_pointer; }
-    void SetStackPointer(byte newStackPointer) { stack_pointer = newStackPointer; }
+    const byte& get_status() const { return status; }
+    const byte& get_a() const { return register_a; }
+    void set_a(byte newRegisterA) { register_a = newRegisterA; }
+    const byte& get_x() const { return register_x; }
+    void set_x(byte newRegisterX) { register_x = newRegisterX; }
+    const byte& get_y() const { return register_y; }
+    void set_y(byte newRegisterY) { register_y = newRegisterY; }
+    void reset_stats() { status = 0; }
+    void set_pc(word newPC) { program_counter = newPC; }
+    const word& get_pc() const { return program_counter; }
+    void set_status(byte value) { status = value; }
+    const byte& get_sp() const { return stack_pointer; }
+    void set_sp(byte newStackPointer) { stack_pointer = newStackPointer; }
 
-    void SetFlag(byte mask, bool set)
+    void set_flag(byte mask, bool set)
     {
         if (set)
             status |= mask;
@@ -102,7 +102,7 @@ public: // public getter
             status &= ~mask;
     }
 
-    bool GetFlag(byte mask) const
+    bool get_flag(byte mask) const
     {
         return status & mask;
     }

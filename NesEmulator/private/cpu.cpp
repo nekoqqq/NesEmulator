@@ -18,7 +18,7 @@ void CPU::load_and_run(vector<byte>& program)
 void CPU::load_and_run_no_reset(program& prog)
 {
     load(prog);
-    program_counter = mem_read_u16(0xFFFC);
+    program_counter = mem_read_word(0xFFFC);
     run();
 }
 
@@ -32,14 +32,14 @@ void CPU::mem_write(word addr, byte data)
     memory[addr] = data;
 }
 
-word CPU::mem_read_u16(word pos) const
+word CPU::mem_read_word(word pos) const
 {
     byte lo = mem_read(pos);
     byte hi = mem_read(pos + 1);
     return static_cast<word>((hi << 8) | lo);
 }
 
-void CPU::mem_write_u16(word pos, word data)
+void CPU::mem_write_word(word pos, word data)
 {
     byte hi = (data >> 8); // 高8位
     byte lo = (data & 0xff); // 低8位
@@ -114,7 +114,7 @@ void CPU::load(vector<byte>& program)
 
     // 在NES插入卡带后，会重置程序状态，并将程序计数器的位置设置为存储在0xFFFC处的值,[X,X,X,X] 也就是最后4个字节
     // 将0xFFFC处存储的值设置为0x8000;
-    mem_write_u16(0xFFFC, 0x8000);
+    mem_write_word(0xFFFC, 0x8000);
 }
 
 void CPU::reset()
@@ -123,7 +123,7 @@ void CPU::reset()
     register_x = 0;
     status = 0;
 
-    program_counter = mem_read_u16(0xFFFC);
+    program_counter = mem_read_word(0xFFFC);
 }
 
 void CPU::run()
@@ -175,7 +175,7 @@ word CPU::get_operand_address(AddressingMode& mode) const
 
     // 两个字节，索引0-65535的整个地址空间
     case AddressingMode::Absolute:
-        address = mem_read_u16(program_counter);
+        address = mem_read_word(program_counter);
         break;
 
     // 用X里面存储的值+一个byte的数据做索引
@@ -196,20 +196,20 @@ word CPU::get_operand_address(AddressingMode& mode) const
 
     case AddressingMode::Absolute_X:
         {
-            uint16_t base = mem_read_u16(program_counter);
+            uint16_t base = mem_read_word(program_counter);
             address = base + register_x; // 指针偏移
         }
         break;
 
     case AddressingMode::Absolute_Y:
         {
-            uint16_t base = mem_read_u16(program_counter);
+            uint16_t base = mem_read_word(program_counter);
             address = base + register_y; // 指针偏移
         }
         break;
     case AddressingMode::Indirect:
         {
-            word base = mem_read_u16(program_counter);
+            word base = mem_read_word(program_counter);
             address = mem_read(base) | (mem_read(base+1) <<8);
         }
         break;
@@ -256,13 +256,13 @@ void CPU::add_to_register_a(byte value)
     // 2. 判断结果是不是比其中的一个数大，因为溢出的时候一定满足result < X AND result < y 
 
     // carry flag
-    SetFlag(CARRY_FLAG, s > 0xff);
+    set_flag(CARRY_FLAG, s > 0xff);
 
     byte res = s;
 
     // overflow flag
     bool bOverflow = (res ^ value) & (res ^ register_a) & 0x80;
-    SetFlag(OVERFLOW_FLAG, bOverflow);
+    set_flag(OVERFLOW_FLAG, bOverflow);
 
     register_a = res;
     update_zero_and_negative_flags(res);

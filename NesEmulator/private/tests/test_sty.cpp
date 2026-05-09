@@ -5,7 +5,7 @@
 #include "../../public/op_code.h"
 
 static void check_flags_unchanged(const CPU& cpu, byte expected_status) {
-    assert(cpu.GetStatus() == expected_status);
+    assert(cpu.get_status() == expected_status);
 }
 
 // ---------- 零页模式 ----------
@@ -13,15 +13,15 @@ static void test_sty_zero_page() {
     word addr = 0x10;
     {
         CPU cpu;
-        cpu.SetRegisterY(0x55);
+        cpu.set_y(0x55);
         cpu.mem_write(addr, 0x00);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), static_cast<byte>(addr));
-        cpu.ResetStatus();
-        byte expected_status = cpu.GetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), static_cast<byte>(addr));
+        cpu.reset_stats();
+        byte expected_status = cpu.get_status();
         OpCode::sty(cpu, ZeroPage);
         assert(cpu.mem_read(addr) == 0x55);
-        assert(cpu.GetRegisterY() == 0x55);
+        assert(cpu.get_y() == 0x55);
         check_flags_unchanged(cpu, expected_status);
         std::cout << "[STY] ZeroPage test passed\n";
     }
@@ -34,29 +34,29 @@ static void test_sty_zero_page_x() {
     word target = (base + x_val) & 0xFF; // 0x15
     {
         CPU cpu;
-        cpu.SetRegisterY(0xAA);
-        cpu.SetRegisterX(x_val);
+        cpu.set_y(0xAA);
+        cpu.set_x(x_val);
         cpu.mem_write(target, 0x00);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), base);
-        cpu.ResetStatus();
-        byte expected_status = cpu.GetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), base);
+        cpu.reset_stats();
+        byte expected_status = cpu.get_status();
         OpCode::sty(cpu, ZeroPage_X);
         assert(cpu.mem_read(target) == 0xAA);
-        assert(cpu.GetRegisterY() == 0xAA);
+        assert(cpu.get_y() == 0xAA);
         check_flags_unchanged(cpu, expected_status);
         std::cout << "[STY] ZeroPageX test passed\n";
     }
     // 绕回测试
     {
         CPU cpu;
-        cpu.SetRegisterY(0x77);
-        cpu.SetRegisterX(1);
+        cpu.set_y(0x77);
+        cpu.set_x(1);
         cpu.mem_write(0x00, 0x00);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0xFF);
-        cpu.ResetStatus();
-        byte expected_status = cpu.GetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0xFF);
+        cpu.reset_stats();
+        byte expected_status = cpu.get_status();
         OpCode::sty(cpu, ZeroPage_X);
         assert(cpu.mem_read(0x00) == 0x77);
         check_flags_unchanged(cpu, expected_status);
@@ -69,12 +69,12 @@ static void test_sty_absolute() {
     word addr = 0x1234;
     {
         CPU cpu;
-        cpu.SetRegisterY(0x42);
+        cpu.set_y(0x42);
         cpu.mem_write(addr, 0x00);
-        cpu.SetPC(0x2000);
-        cpu.mem_write_u16(cpu.GetPC(), addr);
-        cpu.ResetStatus();
-        byte expected_status = cpu.GetStatus();
+        cpu.set_pc(0x2000);
+        cpu.mem_write_word(cpu.get_pc(), addr);
+        cpu.reset_stats();
+        byte expected_status = cpu.get_status();
         OpCode::sty(cpu, Absolute);
         assert(cpu.mem_read(addr) == 0x42);
         check_flags_unchanged(cpu, expected_status);

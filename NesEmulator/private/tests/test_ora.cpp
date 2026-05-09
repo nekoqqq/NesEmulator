@@ -5,7 +5,7 @@
 #include "../../public/op_code.h"
 
 static void check_flags(const CPU& cpu, bool zero, bool negative) {
-    byte status = cpu.GetStatus();
+    byte status = cpu.get_status();
     assert(((status >> 1) & 1) == zero);
     assert(((status >> 7) & 1) == negative);
 }
@@ -15,36 +15,36 @@ static void test_ora_immediate() {
     // 测试1：0x12 | 0x34 = 0x36
     {
         CPU cpu;
-        cpu.SetRegisterA(0x12);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0x34);
-        cpu.ResetStatus();
+        cpu.set_a(0x12);
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0x34);
+        cpu.reset_stats();
         OpCode::op_ora(cpu, Immediate);
-        assert(cpu.GetRegisterA() == 0x36);
+        assert(cpu.get_a() == 0x36);
         check_flags(cpu, false, false);
         std::cout << "[ORA] Immediate test 1 passed\n";
     }
     // 测试2：0x00 | 0x00 = 0x00, Z=1
     {
         CPU cpu;
-        cpu.SetRegisterA(0x00);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0x00);
-        cpu.ResetStatus();
+        cpu.set_a(0x00);
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0x00);
+        cpu.reset_stats();
         OpCode::op_ora(cpu, Immediate);
-        assert(cpu.GetRegisterA() == 0x00);
+        assert(cpu.get_a() == 0x00);
         check_flags(cpu, true, false);
         std::cout << "[ORA] Immediate test 2 passed\n";
     }
     // 测试3：0x80 | 0x01 = 0x81, N=1
     {
         CPU cpu;
-        cpu.SetRegisterA(0x80);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0x01);
-        cpu.ResetStatus();
+        cpu.set_a(0x80);
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0x01);
+        cpu.reset_stats();
         OpCode::op_ora(cpu, Immediate);
-        assert(cpu.GetRegisterA() == 0x81);
+        assert(cpu.get_a() == 0x81);
         check_flags(cpu, false, true);
         std::cout << "[ORA] Immediate test 3 passed\n";
     }
@@ -55,13 +55,13 @@ static void test_ora_zero_page() {
     word addr = 0x10;
     {
         CPU cpu;
-        cpu.SetRegisterA(0x50);
+        cpu.set_a(0x50);
         cpu.mem_write(addr, 0x0A);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), static_cast<byte>(addr));
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), static_cast<byte>(addr));
+        cpu.reset_stats();
         OpCode::op_ora(cpu, ZeroPage);
-        assert(cpu.GetRegisterA() == 0x5A);
+        assert(cpu.get_a() == 0x5A);
         check_flags(cpu, false, false);
         std::cout << "[ORA] ZeroPage test 1 passed\n";
     }
@@ -74,28 +74,28 @@ static void test_ora_zero_page_x() {
     word target = (base + x_val) & 0xFF; // 0x15
     {
         CPU cpu;
-        cpu.SetRegisterA(0x33);
-        cpu.SetRegisterX(x_val);
+        cpu.set_a(0x33);
+        cpu.set_x(x_val);
         cpu.mem_write(target, 0xCC);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), base);
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), base);
+        cpu.reset_stats();
         OpCode::op_ora(cpu, ZeroPage_X);
-        assert(cpu.GetRegisterA() == 0xFF);
+        assert(cpu.get_a() == 0xFF);
         check_flags(cpu, false, true);
         std::cout << "[ORA] ZeroPageX test 1 passed\n";
     }
     // 绕回测试
     {
         CPU cpu;
-        cpu.SetRegisterA(0x01);
-        cpu.SetRegisterX(1);
+        cpu.set_a(0x01);
+        cpu.set_x(1);
         cpu.mem_write(0x00, 0x02);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0xFF);
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0xFF);
+        cpu.reset_stats();
         OpCode::op_ora(cpu, ZeroPage_X);
-        assert(cpu.GetRegisterA() == 0x03);
+        assert(cpu.get_a() == 0x03);
         check_flags(cpu, false, false);
         std::cout << "[ORA] ZeroPageX test 2 (wrap) passed\n";
     }
@@ -106,13 +106,13 @@ static void test_ora_absolute() {
     word addr = 0x1234;
     {
         CPU cpu;
-        cpu.SetRegisterA(0x0F);
+        cpu.set_a(0x0F);
         cpu.mem_write(addr, 0xF0);
-        cpu.SetPC(0x2000);
-        cpu.mem_write_u16(cpu.GetPC(), addr);
-        cpu.ResetStatus();
+        cpu.set_pc(0x2000);
+        cpu.mem_write_word(cpu.get_pc(), addr);
+        cpu.reset_stats();
         OpCode::op_ora(cpu, Absolute);
-        assert(cpu.GetRegisterA() == 0xFF);
+        assert(cpu.get_a() == 0xFF);
         check_flags(cpu, false, true);
         std::cout << "[ORA] Absolute test 1 passed\n";
     }
@@ -125,14 +125,14 @@ static void test_ora_absolute_x() {
     word target = base + x_val; // 0x1234
     {
         CPU cpu;
-        cpu.SetRegisterA(0x55);
-        cpu.SetRegisterX(x_val);
+        cpu.set_a(0x55);
+        cpu.set_x(x_val);
         cpu.mem_write(target, 0xAA);
-        cpu.SetPC(0x3000);
-        cpu.mem_write_u16(cpu.GetPC(), base);
-        cpu.ResetStatus();
+        cpu.set_pc(0x3000);
+        cpu.mem_write_word(cpu.get_pc(), base);
+        cpu.reset_stats();
         OpCode::op_ora(cpu, Absolute_X);
-        assert(cpu.GetRegisterA() == 0xFF);
+        assert(cpu.get_a() == 0xFF);
         check_flags(cpu, false, true);
         std::cout << "[ORA] AbsoluteX test 1 passed\n";
     }
@@ -142,14 +142,14 @@ static void test_ora_absolute_x() {
         word base2 = 0x12FF;
         byte x_val2 = 2;
         word target2 = base2 + x_val2; // 0x1301
-        cpu.SetRegisterA(0x01);
-        cpu.SetRegisterX(x_val2);
+        cpu.set_a(0x01);
+        cpu.set_x(x_val2);
         cpu.mem_write(target2, 0x80);
-        cpu.SetPC(0x3000);
-        cpu.mem_write_u16(cpu.GetPC(), base2);
-        cpu.ResetStatus();
+        cpu.set_pc(0x3000);
+        cpu.mem_write_word(cpu.get_pc(), base2);
+        cpu.reset_stats();
         OpCode::op_ora(cpu, Absolute_X);
-        assert(cpu.GetRegisterA() == 0x81);
+        assert(cpu.get_a() == 0x81);
         check_flags(cpu, false, true);
         std::cout << "[ORA] AbsoluteX test 2 (page cross) passed\n";
     }
@@ -162,14 +162,14 @@ static void test_ora_absolute_y() {
     word target = base + y_val;
     {
         CPU cpu;
-        cpu.SetRegisterA(0x00);
-        cpu.SetRegisterY(y_val);
+        cpu.set_a(0x00);
+        cpu.set_y(y_val);
         cpu.mem_write(target, 0x77);
-        cpu.SetPC(0x3000);
-        cpu.mem_write_u16(cpu.GetPC(), base);
-        cpu.ResetStatus();
+        cpu.set_pc(0x3000);
+        cpu.mem_write_word(cpu.get_pc(), base);
+        cpu.reset_stats();
         OpCode::op_ora(cpu, Absolute_Y);
-        assert(cpu.GetRegisterA() == 0x77);
+        assert(cpu.get_a() == 0x77);
         check_flags(cpu, false, false);
         std::cout << "[ORA] AbsoluteY test 1 passed\n";
     }
@@ -185,13 +185,13 @@ static void test_ora_indirect_x() {
     cpu.mem_write(pointer, target & 0xFF);
     cpu.mem_write(pointer + 1, target >> 8);
     cpu.mem_write(target, 0x12);
-    cpu.SetRegisterA(0x00);
-    cpu.SetRegisterX(x_val);
-    cpu.SetPC(0x1000);
-    cpu.mem_write(cpu.GetPC(), zp_base);
-    cpu.ResetStatus();
+    cpu.set_a(0x00);
+    cpu.set_x(x_val);
+    cpu.set_pc(0x1000);
+    cpu.mem_write(cpu.get_pc(), zp_base);
+    cpu.reset_stats();
     OpCode::op_ora(cpu, Indirect_X);
-    assert(cpu.GetRegisterA() == 0x12);
+    assert(cpu.get_a() == 0x12);
     check_flags(cpu, false, false);
     std::cout << "[ORA] IndirectX test 1 passed\n";
 }
@@ -206,13 +206,13 @@ static void test_ora_indirect_y() {
     cpu.mem_write(zp_base, base_addr & 0xFF);
     cpu.mem_write(zp_base + 1, base_addr >> 8);
     cpu.mem_write(target, 0x20);
-    cpu.SetRegisterA(0x10);
-    cpu.SetRegisterY(y_val);
-    cpu.SetPC(0x1000);
-    cpu.mem_write(cpu.GetPC(), zp_base);
-    cpu.ResetStatus();
+    cpu.set_a(0x10);
+    cpu.set_y(y_val);
+    cpu.set_pc(0x1000);
+    cpu.mem_write(cpu.get_pc(), zp_base);
+    cpu.reset_stats();
     OpCode::op_ora(cpu,Indirect_D_Y);
-    assert(cpu.GetRegisterA() == 0x30);
+    assert(cpu.get_a() == 0x30);
     check_flags(cpu, false, false);
     std::cout << "[ORA] IndirectY test 1 passed\n";
 }

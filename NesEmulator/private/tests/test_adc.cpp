@@ -6,7 +6,7 @@
 
 // 检查 C, Z, V, N 标志
 static void check_flags(const CPU& cpu, bool carry, bool zero, bool overflow, bool negative) {
-    byte s = cpu.GetStatus();
+    byte s = cpu.get_status();
     assert(((s >> 0) & 1) == carry);
     assert(((s >> 1) & 1) == zero);
     assert(((s >> 6) & 1) == overflow);
@@ -18,13 +18,13 @@ static void test_adc_immediate() {
     // 测试1：无进位，0x10 + 0x20 = 0x30
     {
         CPU cpu;
-        cpu.SetRegisterA(0x10);
-        cpu.ResetStatus();
-        cpu.SetFlag(CPU::CARRY_FLAG,false);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0x20);
+        cpu.set_a(0x10);
+        cpu.reset_stats();
+        cpu.set_flag(CPU::CARRY_FLAG,false);
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0x20);
         OpCode::adc(cpu, Immediate);
-        assert(cpu.GetRegisterA() == 0x30);
+        assert(cpu.get_a() == 0x30);
         check_flags(cpu, false, false, false, false);
         std::cout << "[ADC] Immediate test 1 passed\n";
     }
@@ -32,13 +32,13 @@ static void test_adc_immediate() {
     // 测试2：有进位，0x10 + 0x20 + 1 = 0x31
     {
         CPU cpu;
-        cpu.SetRegisterA(0x10);
-        cpu.ResetStatus();
-        cpu.SetFlag(CPU::CARRY_FLAG,true);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0x20);
+        cpu.set_a(0x10);
+        cpu.reset_stats();
+        cpu.set_flag(CPU::CARRY_FLAG,true);
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0x20);
         OpCode::adc(cpu, Immediate);
-        assert(cpu.GetRegisterA() == 0x31);
+        assert(cpu.get_a() == 0x31);
         check_flags(cpu, false, false, false, false);
         std::cout << "[ADC] Immediate test 2 passed\n";
     }
@@ -46,13 +46,13 @@ static void test_adc_immediate() {
     // 测试3：进位产生，0xFF + 0x01 = 0x00, C=1, Z=1
     {
         CPU cpu;
-        cpu.SetRegisterA(0xFF);
-        cpu.ResetStatus();
-        cpu.SetFlag(CPU::CARRY_FLAG,false);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0x01);
+        cpu.set_a(0xFF);
+        cpu.reset_stats();
+        cpu.set_flag(CPU::CARRY_FLAG,false);
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0x01);
         OpCode::adc(cpu, Immediate);
-        assert(cpu.GetRegisterA() == 0x00);
+        assert(cpu.get_a() == 0x00);
         check_flags(cpu, true, true, false, false);
         std::cout << "[ADC] Immediate test 3 passed\n";
     }
@@ -60,13 +60,13 @@ static void test_adc_immediate() {
     // 测试4：负结果，0x01 + 0x7F = 0x80, N=1
     {
         CPU cpu;
-        cpu.SetRegisterA(0x01);
-        cpu.ResetStatus();
-        cpu.SetFlag(CPU::CARRY_FLAG,false);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0x7F);
+        cpu.set_a(0x01);
+        cpu.reset_stats();
+        cpu.set_flag(CPU::CARRY_FLAG,false);
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0x7F);
         OpCode::adc(cpu, Immediate);
-        assert(cpu.GetRegisterA() == 0x80);
+        assert(cpu.get_a() == 0x80);
         check_flags(cpu, false, false, true, true);
         std::cout << "[ADC] Immediate test 4 passed\n";
     }
@@ -74,13 +74,13 @@ static void test_adc_immediate() {
     // 测试5：正溢出，0x40 + 0x60 = 0xA0, V=1, N=1
     {
         CPU cpu;
-        cpu.SetRegisterA(0x40);
-        cpu.ResetStatus();
-        cpu.SetFlag(CPU::CARRY_FLAG,false);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0x60);
+        cpu.set_a(0x40);
+        cpu.reset_stats();
+        cpu.set_flag(CPU::CARRY_FLAG,false);
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0x60);
         OpCode::adc(cpu, Immediate);
-        assert(cpu.GetRegisterA() == 0xA0);
+        assert(cpu.get_a() == 0xA0);
         check_flags(cpu, false, false, true, true);
         std::cout << "[ADC] Immediate test 5 passed\n";
     }
@@ -88,13 +88,13 @@ static void test_adc_immediate() {
     // 测试6：负溢出，0x80 + 0x80 = 0x00, C=1, V=1, Z=1
     {
         CPU cpu;
-        cpu.SetRegisterA(0x80);
-        cpu.ResetStatus();
-        cpu.SetFlag(CPU::CARRY_FLAG,false);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0x80);
+        cpu.set_a(0x80);
+        cpu.reset_stats();
+        cpu.set_flag(CPU::CARRY_FLAG,false);
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0x80);
         OpCode::adc(cpu, Immediate);
-        assert(cpu.GetRegisterA() == 0x00);
+        assert(cpu.get_a() == 0x00);
         check_flags(cpu, true, true, true, false);
         std::cout << "[ADC] Immediate test 6 passed\n";
     }
@@ -107,14 +107,14 @@ static void test_adc_zero_page() {
     // 无进位
     {
         CPU cpu;
-        cpu.SetRegisterA(0x10);
+        cpu.set_a(0x10);
         cpu.mem_write(addr, 0x20);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), static_cast<byte>(addr));
-        cpu.ResetStatus();
-        cpu.SetFlag(CPU::CARRY_FLAG,false);
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), static_cast<byte>(addr));
+        cpu.reset_stats();
+        cpu.set_flag(CPU::CARRY_FLAG,false);
         OpCode::adc(cpu, ZeroPage);
-        assert(cpu.GetRegisterA() == 0x30);
+        assert(cpu.get_a() == 0x30);
         check_flags(cpu, false, false, false, false);
         std::cout << "[ADC] ZeroPage test 1 passed\n";
     }
@@ -122,14 +122,14 @@ static void test_adc_zero_page() {
     // 有进位
     {
         CPU cpu;
-        cpu.SetRegisterA(0x10);
+        cpu.set_a(0x10);
         cpu.mem_write(addr, 0x20);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), static_cast<byte>(addr));
-        cpu.ResetStatus();
-        cpu.SetFlag(CPU::CARRY_FLAG,true);
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), static_cast<byte>(addr));
+        cpu.reset_stats();
+        cpu.set_flag(CPU::CARRY_FLAG,true);
         OpCode::adc(cpu, ZeroPage);
-        assert(cpu.GetRegisterA() == 0x31);
+        assert(cpu.get_a() == 0x31);
         check_flags(cpu, false, false, false, false);
         std::cout << "[ADC] ZeroPage test 2 passed\n";
     }
@@ -137,14 +137,14 @@ static void test_adc_zero_page() {
     // 产生进位
     {
         CPU cpu;
-        cpu.SetRegisterA(0xFF);
+        cpu.set_a(0xFF);
         cpu.mem_write(addr, 0x01);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), static_cast<byte>(addr));
-        cpu.ResetStatus();
-        cpu.SetFlag(CPU::CARRY_FLAG,false);
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), static_cast<byte>(addr));
+        cpu.reset_stats();
+        cpu.set_flag(CPU::CARRY_FLAG,false);
         OpCode::adc(cpu, ZeroPage);
-        assert(cpu.GetRegisterA() == 0x00);
+        assert(cpu.get_a() == 0x00);
         check_flags(cpu, true, true, false, false);
         std::cout << "[ADC] ZeroPage test 3 passed\n";
     }
@@ -155,16 +155,16 @@ static void test_adc_zero_page_x() {
     // 普通：基址 0x10, X=5 -> 0x15
     {
         CPU cpu;
-        cpu.SetRegisterA(0x10);
-        cpu.SetRegisterX(5);
+        cpu.set_a(0x10);
+        cpu.set_x(5);
         word target = 0x15;
         cpu.mem_write(target, 0x20);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0x10);
-        cpu.ResetStatus();
-        cpu.SetFlag(CPU::CARRY_FLAG,false);
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0x10);
+        cpu.reset_stats();
+        cpu.set_flag(CPU::CARRY_FLAG,false);
         OpCode::adc(cpu, ZeroPage_X);
-        assert(cpu.GetRegisterA() == 0x30);
+        assert(cpu.get_a() == 0x30);
         check_flags(cpu, false, false, false, false);
         std::cout << "[ADC] ZeroPageX test 1 passed\n";
     }
@@ -172,15 +172,15 @@ static void test_adc_zero_page_x() {
     // 绕回：0xFF + 1 = 0x00
     {
         CPU cpu;
-        cpu.SetRegisterA(0x01);
-        cpu.SetRegisterX(1);
+        cpu.set_a(0x01);
+        cpu.set_x(1);
         cpu.mem_write(0x00, 0x02);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0xFF);
-        cpu.ResetStatus();
-        cpu.SetFlag(CPU::CARRY_FLAG,false);
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0xFF);
+        cpu.reset_stats();
+        cpu.set_flag(CPU::CARRY_FLAG,false);
         OpCode::adc(cpu, ZeroPage_X);
-        assert(cpu.GetRegisterA() == 0x03);
+        assert(cpu.get_a() == 0x03);
         check_flags(cpu, false, false, false, false);
         std::cout << "[ADC] ZeroPageX test 2 passed\n";
     }
@@ -192,14 +192,14 @@ static void test_adc_absolute() {
 
     {
         CPU cpu;
-        cpu.SetRegisterA(0x10);
+        cpu.set_a(0x10);
         cpu.mem_write(addr, 0x20);
-        cpu.SetPC(0x2000);
-        cpu.mem_write_u16(cpu.GetPC(), addr);
-        cpu.ResetStatus();
-        cpu.SetFlag(CPU::CARRY_FLAG,false);
+        cpu.set_pc(0x2000);
+        cpu.mem_write_word(cpu.get_pc(), addr);
+        cpu.reset_stats();
+        cpu.set_flag(CPU::CARRY_FLAG,false);
         OpCode::adc(cpu, Absolute);
-        assert(cpu.GetRegisterA() == 0x30);
+        assert(cpu.get_a() == 0x30);
         check_flags(cpu, false, false, false, false);
         std::cout << "[ADC] Absolute test 1 passed\n";
     }
@@ -213,15 +213,15 @@ static void test_adc_absolute_x() {
 
     {
         CPU cpu;
-        cpu.SetRegisterA(0x10);
-        cpu.SetRegisterX(x_val);
+        cpu.set_a(0x10);
+        cpu.set_x(x_val);
         cpu.mem_write(target, 0x20);
-        cpu.SetPC(0x3000);
-        cpu.mem_write_u16(cpu.GetPC(), base);
-        cpu.ResetStatus();
-        cpu.SetFlag(CPU::CARRY_FLAG,false);
+        cpu.set_pc(0x3000);
+        cpu.mem_write_word(cpu.get_pc(), base);
+        cpu.reset_stats();
+        cpu.set_flag(CPU::CARRY_FLAG,false);
         OpCode::adc(cpu, Absolute_X);
-        assert(cpu.GetRegisterA() == 0x30);
+        assert(cpu.get_a() == 0x30);
         check_flags(cpu, false, false, false, false);
         std::cout << "[ADC] AbsoluteX test 1 passed\n";
     }
@@ -235,15 +235,15 @@ static void test_adc_absolute_y() {
 
     {
         CPU cpu;
-        cpu.SetRegisterA(0x10);
-        cpu.SetRegisterY(y_val);
+        cpu.set_a(0x10);
+        cpu.set_y(y_val);
         cpu.mem_write(target, 0x20);
-        cpu.SetPC(0x3000);
-        cpu.mem_write_u16(cpu.GetPC(), base);
-        cpu.ResetStatus();
-        cpu.SetFlag(CPU::CARRY_FLAG,false);
+        cpu.set_pc(0x3000);
+        cpu.mem_write_word(cpu.get_pc(), base);
+        cpu.reset_stats();
+        cpu.set_flag(CPU::CARRY_FLAG,false);
         OpCode::adc(cpu, Absolute_Y);
-        assert(cpu.GetRegisterA() == 0x30);
+        assert(cpu.get_a() == 0x30);
         check_flags(cpu, false, false, false, false);
         std::cout << "[ADC] AbsoluteY test 1 passed\n";
     }
@@ -257,17 +257,17 @@ static void test_adc_indirect_x() {
     word target_addr = 0x4321;
 
     CPU cpu;
-    cpu.SetRegisterA(0x10);
-    cpu.SetRegisterX(x_val);
+    cpu.set_a(0x10);
+    cpu.set_x(x_val);
     cpu.mem_write(pointer_addr, target_addr & 0xFF);
     cpu.mem_write(pointer_addr + 1, target_addr >> 8);
     cpu.mem_write(target_addr, 0x20);
-    cpu.SetPC(0x1000);
-    cpu.mem_write(cpu.GetPC(), zp_base);
-    cpu.ResetStatus();
-    cpu.SetFlag(CPU::CARRY_FLAG,false);
+    cpu.set_pc(0x1000);
+    cpu.mem_write(cpu.get_pc(), zp_base);
+    cpu.reset_stats();
+    cpu.set_flag(CPU::CARRY_FLAG,false);
     OpCode::adc(cpu, Indirect_X);
-    assert(cpu.GetRegisterA() == 0x30);
+    assert(cpu.get_a() == 0x30);
     check_flags(cpu, false, false, false, false);
     std::cout << "[ADC] IndirectX test 1 passed\n";
 }
@@ -280,17 +280,17 @@ static void test_adc_indirect_y() {
     word target_addr = base_addr + y_val;
 
     CPU cpu;
-    cpu.SetRegisterA(0x10);
-    cpu.SetRegisterY(y_val);
+    cpu.set_a(0x10);
+    cpu.set_y(y_val);
     cpu.mem_write(zp_base, base_addr & 0xFF);
     cpu.mem_write(zp_base + 1, base_addr >> 8);
     cpu.mem_write(target_addr, 0x20);
-    cpu.SetPC(0x1000);
-    cpu.mem_write(cpu.GetPC(), zp_base);
-    cpu.ResetStatus();
-    cpu.SetFlag(CPU::CARRY_FLAG,false);
+    cpu.set_pc(0x1000);
+    cpu.mem_write(cpu.get_pc(), zp_base);
+    cpu.reset_stats();
+    cpu.set_flag(CPU::CARRY_FLAG,false);
     OpCode::adc(cpu, Indirect_D_Y);
-    assert(cpu.GetRegisterA() == 0x30);
+    assert(cpu.get_a() == 0x30);
     check_flags(cpu, false, false, false, false);
     std::cout << "[ADC] IndirectY test 1 passed\n";
 }

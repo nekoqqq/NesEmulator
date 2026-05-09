@@ -5,7 +5,7 @@
 
 // 检查 C, Z, N 标志
 static void check_flags(const CPU& cpu, bool carry, bool zero, bool negative) {
-    byte status = cpu.GetStatus();
+    byte status = cpu.get_status();
     assert(((status >> 0) & 1) == carry);
     assert(((status >> 1) & 1) == zero);
     assert(((status >> 7) & 1) == negative);
@@ -16,22 +16,22 @@ static void test_cpx_immediate() {
     // 测试1：X == M
     {
         CPU cpu;
-        cpu.SetRegisterX(0x42);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0x42);
-        cpu.ResetStatus();
+        cpu.set_x(0x42);
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0x42);
+        cpu.reset_stats();
         OpCode::cpx(cpu, Immediate);
-        assert(cpu.GetRegisterX() == 0x42);
+        assert(cpu.get_x() == 0x42);
         check_flags(cpu, true, true, false);
         std::cout << "[CPX] Immediate test 1 (equal) passed\n";
     }
     // 测试2：X > M
     {
         CPU cpu;
-        cpu.SetRegisterX(0x50);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0x30);
-        cpu.ResetStatus();
+        cpu.set_x(0x50);
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0x30);
+        cpu.reset_stats();
         OpCode::cpx(cpu, Immediate);
         check_flags(cpu, true, false, false);
         std::cout << "[CPX] Immediate test 2 (X > M) passed\n";
@@ -39,10 +39,10 @@ static void test_cpx_immediate() {
     // 测试3：X < M
     {
         CPU cpu;
-        cpu.SetRegisterX(0x20);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0x80);
-        cpu.ResetStatus();
+        cpu.set_x(0x20);
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0x80);
+        cpu.reset_stats();
         OpCode::cpx(cpu, Immediate);
         check_flags(cpu, false, false, true);
         std::cout << "[CPX] Immediate test 3 (X < M) passed\n";
@@ -50,10 +50,10 @@ static void test_cpx_immediate() {
     // 边界：X=0x80, M=0x80
     {
         CPU cpu;
-        cpu.SetRegisterX(0x80);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0x80);
-        cpu.ResetStatus();
+        cpu.set_x(0x80);
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0x80);
+        cpu.reset_stats();
         OpCode::cpx(cpu, Immediate);
         check_flags(cpu, true, true, false);
         std::cout << "[CPX] Immediate test 4 (boundary equal) passed\n";
@@ -66,11 +66,11 @@ static void test_cpx_zero_page() {
     // X < M
     {
         CPU cpu;
-        cpu.SetRegisterX(0x10);
+        cpu.set_x(0x10);
         cpu.mem_write(addr, 0x20);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), static_cast<byte>(addr));
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), static_cast<byte>(addr));
+        cpu.reset_stats();
         OpCode::cpx(cpu, ZeroPage);
         check_flags(cpu, false, false, true);
         std::cout << "[CPX] ZeroPage test 1 (X < M) passed\n";
@@ -78,11 +78,11 @@ static void test_cpx_zero_page() {
     // X == M
     {
         CPU cpu;
-        cpu.SetRegisterX(0x30);
+        cpu.set_x(0x30);
         cpu.mem_write(addr, 0x30);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), static_cast<byte>(addr));
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), static_cast<byte>(addr));
+        cpu.reset_stats();
         OpCode::cpx(cpu, ZeroPage);
         check_flags(cpu, true, true, false);
         std::cout << "[CPX] ZeroPage test 2 (equal) passed\n";
@@ -90,11 +90,11 @@ static void test_cpx_zero_page() {
     // X > M
     {
         CPU cpu;
-        cpu.SetRegisterX(0x40);
+        cpu.set_x(0x40);
         cpu.mem_write(addr, 0x30);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), static_cast<byte>(addr));
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), static_cast<byte>(addr));
+        cpu.reset_stats();
         OpCode::cpx(cpu, ZeroPage);
         check_flags(cpu, true, false, false);
         std::cout << "[CPX] ZeroPage test 3 (X > M) passed\n";
@@ -107,11 +107,11 @@ static void test_cpx_absolute() {
     // X == M
     {
         CPU cpu;
-        cpu.SetRegisterX(0x55);
+        cpu.set_x(0x55);
         cpu.mem_write(addr, 0x55);
-        cpu.SetPC(0x2000);
-        cpu.mem_write_u16(cpu.GetPC(), addr);
-        cpu.ResetStatus();
+        cpu.set_pc(0x2000);
+        cpu.mem_write_word(cpu.get_pc(), addr);
+        cpu.reset_stats();
         OpCode::cpx(cpu, Absolute);
         check_flags(cpu, true, true, false);
         std::cout << "[CPX] Absolute test 1 (equal) passed\n";
@@ -119,11 +119,11 @@ static void test_cpx_absolute() {
     // X < M
     {
         CPU cpu;
-        cpu.SetRegisterX(0x10);
+        cpu.set_x(0x10);
         cpu.mem_write(addr, 0x20);
-        cpu.SetPC(0x2000);
-        cpu.mem_write_u16(cpu.GetPC(), addr);
-        cpu.ResetStatus();
+        cpu.set_pc(0x2000);
+        cpu.mem_write_word(cpu.get_pc(), addr);
+        cpu.reset_stats();
         OpCode::cpx(cpu, Absolute);
         check_flags(cpu, false, false, true);
         std::cout << "[CPX] Absolute test 2 (X < M) passed\n";
@@ -131,11 +131,11 @@ static void test_cpx_absolute() {
     // X > M
     {
         CPU cpu;
-        cpu.SetRegisterX(0x70);
+        cpu.set_x(0x70);
         cpu.mem_write(addr, 0x60);
-        cpu.SetPC(0x2000);
-        cpu.mem_write_u16(cpu.GetPC(), addr);
-        cpu.ResetStatus();
+        cpu.set_pc(0x2000);
+        cpu.mem_write_word(cpu.get_pc(), addr);
+        cpu.reset_stats();
         OpCode::cpx(cpu, Absolute);
         check_flags(cpu, true, false, false);
         std::cout << "[CPX] Absolute test 3 (X > M) passed\n";

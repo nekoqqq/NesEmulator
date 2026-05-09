@@ -324,11 +324,11 @@ bool OpCode::bit(CPU& cpu, AddressingMode mode)
     byte result = cpu.register_a & value;
 
     // 设置Z标志
-    cpu.SetFlag(CPU::ZERO_FLAG, result == 0);
+    cpu.set_flag(CPU::ZERO_FLAG, result == 0);
 
-    cpu.SetFlag(CPU::NEGATIVE_FLAG, value & CPU::NEGATIVE_FLAG);
+    cpu.set_flag(CPU::NEGATIVE_FLAG, value & CPU::NEGATIVE_FLAG);
 
-    cpu.SetFlag(CPU::OVERFLOW_FLAG, value & CPU::OVERFLOW_FLAG);
+    cpu.set_flag(CPU::OVERFLOW_FLAG, value & CPU::OVERFLOW_FLAG);
 
     return true;
 }
@@ -361,14 +361,14 @@ bool OpCode::brk(CPU& cpu, AddressingMode mode)
     cpu.stack_pointer--;
 
     // 2. 设置中断标志
-    cpu.SetFlag(CPU::BREAK_FLAG, true);
+    cpu.set_flag(CPU::BREAK_FLAG, true);
 
     // 3. CPU状态压栈
     cpu.mem_write(cpu.stack_pointer + 0x0100, cpu.status);
     cpu.stack_pointer--;
 
     // 4. 设置中断禁用标志I（表示正在中断中）
-    cpu.SetFlag(CPU::INTERRUPT_FLAG, true);
+    cpu.set_flag(CPU::INTERRUPT_FLAG, true);
 
     // 5. 读取中断向量表（$FFFE低字节，$FFFF高字节）并跳转
     word int_vector = cpu.mem_read(0xFFFF) << 8 | cpu.mem_read(0xFFFE);
@@ -410,8 +410,8 @@ bool OpCode::tay(CPU& cpu, AddressingMode mode)
 bool OpCode::tsx(CPU& cpu, AddressingMode mode)
 {
     cpu.register_x = cpu.stack_pointer;
-    cpu.SetFlag(CPU::ZERO_FLAG, cpu.stack_pointer == 0);
-    cpu.SetFlag(CPU::NEGATIVE_FLAG, cpu.stack_pointer & CPU::NEGATIVE_FLAG);
+    cpu.set_flag(CPU::ZERO_FLAG, cpu.stack_pointer == 0);
+    cpu.set_flag(CPU::NEGATIVE_FLAG, cpu.stack_pointer & CPU::NEGATIVE_FLAG);
     
     return true;
 }
@@ -419,8 +419,8 @@ bool OpCode::tsx(CPU& cpu, AddressingMode mode)
 bool OpCode::txa(CPU& cpu, AddressingMode mode)
 {
     cpu.register_a = cpu.register_x;
-    cpu.SetFlag(CPU::ZERO_FLAG, cpu.register_a == 0);
-    cpu.SetFlag(CPU::NEGATIVE_FLAG, cpu.register_a & CPU::NEGATIVE_FLAG);
+    cpu.set_flag(CPU::ZERO_FLAG, cpu.register_a == 0);
+    cpu.set_flag(CPU::NEGATIVE_FLAG, cpu.register_a & CPU::NEGATIVE_FLAG);
     
     return true;
 }
@@ -436,8 +436,8 @@ bool OpCode::tya(CPU& cpu, AddressingMode mode)
 {
     cpu.register_a = cpu.register_y;
 
-    cpu.SetFlag(CPU::ZERO_FLAG, cpu.register_a == 0);
-    cpu.SetFlag(CPU::NEGATIVE_FLAG, cpu.register_a & CPU::NEGATIVE_FLAG);
+    cpu.set_flag(CPU::ZERO_FLAG, cpu.register_a == 0);
+    cpu.set_flag(CPU::NEGATIVE_FLAG, cpu.register_a & CPU::NEGATIVE_FLAG);
     
     return true;
 }
@@ -504,9 +504,9 @@ bool OpCode::lsr(CPU& cpu, AddressingMode mode)
         bool carry = data & CPU::CARRY_FLAG;
         byte result = data >> 1;
         cpu.register_a = result;
-        cpu.SetFlag(CPU::CARRY_FLAG, carry);
-        cpu.SetFlag(CPU::ZERO_FLAG, result == 0);
-        cpu.SetFlag(CPU::NEGATIVE_FLAG, false); // 结果最高位总是 0
+        cpu.set_flag(CPU::CARRY_FLAG, carry);
+        cpu.set_flag(CPU::ZERO_FLAG, result == 0);
+        cpu.set_flag(CPU::NEGATIVE_FLAG, false); // 结果最高位总是 0
     }
     else
     {
@@ -515,9 +515,9 @@ bool OpCode::lsr(CPU& cpu, AddressingMode mode)
         bool carry = data & CPU::CARRY_FLAG;
         byte result = data >> 1;
         cpu.mem_write(addr, result);
-        cpu.SetFlag(CPU::CARRY_FLAG, carry);
-        cpu.SetFlag(CPU::ZERO_FLAG, result == 0);
-        cpu.SetFlag(CPU::NEGATIVE_FLAG, false);
+        cpu.set_flag(CPU::CARRY_FLAG, carry);
+        cpu.set_flag(CPU::ZERO_FLAG, result == 0);
+        cpu.set_flag(CPU::NEGATIVE_FLAG, false);
     }
     return true;
 }
@@ -547,8 +547,8 @@ bool OpCode::pla(CPU& cpu, AddressingMode mode)
 {
     cpu.stack_pointer++;
     cpu.register_a = cpu.mem_read(cpu.stack_pointer + 0x0100);
-    cpu.SetFlag(CPU::ZERO_FLAG, cpu.register_a == 0);
-    cpu.SetFlag(CPU::NEGATIVE_FLAG, cpu.register_a & CPU::NEGATIVE_FLAG);
+    cpu.set_flag(CPU::ZERO_FLAG, cpu.register_a == 0);
+    cpu.set_flag(CPU::NEGATIVE_FLAG, cpu.register_a & CPU::NEGATIVE_FLAG);
 
     return true;
 }
@@ -557,7 +557,7 @@ bool OpCode::plp(CPU& cpu, AddressingMode mode)
 {
     cpu.stack_pointer++;
     cpu.status = cpu.mem_read(cpu.stack_pointer + 0x0100);
-    cpu.SetFlag(CPU::BREAK_FLAG | CPU::UNUSED_FLAG, false); // 清除 bit4 和 bit5
+    cpu.set_flag(CPU::BREAK_FLAG | CPU::UNUSED_FLAG, false); // 清除 bit4 和 bit5
 
     return true;
 }
@@ -567,25 +567,25 @@ bool OpCode::rol(CPU& cpu, AddressingMode mode)
     if (mode == Accumulator)
     {
         byte data = cpu.register_a;
-        bool carry_in = cpu.GetFlag(CPU::CARRY_FLAG);
+        bool carry_in = cpu.get_flag(CPU::CARRY_FLAG);
         bool carry_out = (data & CPU::NEGATIVE_FLAG) != 0;
         byte result = (data << 1) | (carry_in ? 1 : 0);
         cpu.register_a = result;
-        cpu.SetFlag(CPU::CARRY_FLAG, carry_out);
-        cpu.SetFlag(CPU::ZERO_FLAG, result == 0);
-        cpu.SetFlag(CPU::NEGATIVE_FLAG, result & CPU::NEGATIVE_FLAG);
+        cpu.set_flag(CPU::CARRY_FLAG, carry_out);
+        cpu.set_flag(CPU::ZERO_FLAG, result == 0);
+        cpu.set_flag(CPU::NEGATIVE_FLAG, result & CPU::NEGATIVE_FLAG);
     }
     else
     {
         word addr = cpu.get_operand_address(mode);
         byte data = cpu.mem_read(addr);
-        bool carry_in = cpu.GetFlag(CPU::CARRY_FLAG);
+        bool carry_in = cpu.get_flag(CPU::CARRY_FLAG);
         bool carry_out = (data & 0x80) != 0;
         byte result = (data << 1) | (carry_in ? 1 : 0);
         cpu.mem_write(addr, result);
-        cpu.SetFlag(CPU::CARRY_FLAG, carry_out);
-        cpu.SetFlag(CPU::ZERO_FLAG, result == 0);
-        cpu.SetFlag(CPU::NEGATIVE_FLAG, result & 0x80);
+        cpu.set_flag(CPU::CARRY_FLAG, carry_out);
+        cpu.set_flag(CPU::ZERO_FLAG, result == 0);
+        cpu.set_flag(CPU::NEGATIVE_FLAG, result & 0x80);
     }
 
     return true;
@@ -596,25 +596,25 @@ bool OpCode::ror(CPU& cpu, AddressingMode mode)
     if (mode == Accumulator)
     {
         byte data = cpu.register_a;
-        bool carry_in = cpu.GetFlag(CPU::CARRY_FLAG);
+        bool carry_in = cpu.get_flag(CPU::CARRY_FLAG);
         bool carry_out = (data & CPU::CARRY_FLAG) != 0;
         byte result = (data >> 1) | (carry_in ? CPU::NEGATIVE_FLAG : 0);
         cpu.register_a = result;
-        cpu.SetFlag(CPU::CARRY_FLAG, carry_out);
-        cpu.SetFlag(CPU::ZERO_FLAG, result == 0);
-        cpu.SetFlag(CPU::NEGATIVE_FLAG, result & CPU::NEGATIVE_FLAG);
+        cpu.set_flag(CPU::CARRY_FLAG, carry_out);
+        cpu.set_flag(CPU::ZERO_FLAG, result == 0);
+        cpu.set_flag(CPU::NEGATIVE_FLAG, result & CPU::NEGATIVE_FLAG);
     }
     else
     {
         word addr = cpu.get_operand_address(mode);
         byte data = cpu.mem_read(addr);
-        bool carry_in = cpu.GetFlag(CPU::CARRY_FLAG);
+        bool carry_in = cpu.get_flag(CPU::CARRY_FLAG);
         bool carry_out = (data & CPU::CARRY_FLAG) != 0;
         byte result = (data >> 1) | (carry_in ? CPU::NEGATIVE_FLAG : 0);
         cpu.mem_write(addr, result);
-        cpu.SetFlag(CPU::CARRY_FLAG, carry_out);
-        cpu.SetFlag(CPU::ZERO_FLAG, result == 0);
-        cpu.SetFlag(CPU::NEGATIVE_FLAG, result & CPU::NEGATIVE_FLAG);
+        cpu.set_flag(CPU::CARRY_FLAG, carry_out);
+        cpu.set_flag(CPU::ZERO_FLAG, result == 0);
+        cpu.set_flag(CPU::NEGATIVE_FLAG, result & CPU::NEGATIVE_FLAG);
     }
 
     return true;
@@ -654,19 +654,19 @@ bool OpCode::rts(CPU& cpu, AddressingMode mode)
 
 bool OpCode::sec(CPU& cpu, AddressingMode mode)
 {
-    cpu.SetFlag(CPU::CARRY_FLAG, true);
+    cpu.set_flag(CPU::CARRY_FLAG, true);
     return true;
 }
 
 bool OpCode::sed(CPU& cpu, AddressingMode mode)
 {
-    cpu.SetFlag(CPU::DECIMAL_FLAG, true);
+    cpu.set_flag(CPU::DECIMAL_FLAG, true);
     return true;
 }
 
 bool OpCode::sei(CPU& cpu, AddressingMode mode)
 {
-    cpu.SetFlag(CPU::INTERRUPT_FLAG, true);
+    cpu.set_flag(CPU::INTERRUPT_FLAG, true);
     return true;
 }
 
@@ -738,7 +738,7 @@ bool OpCode::asl(CPU& cpu, AddressingMode mode)
         byte data = cpu.register_a;
         bool bOldCarry = data >> 7;
         byte result = static_cast<byte>((data << 1) & 0xff);
-        cpu.SetFlag(CPU::CARRY_FLAG, bOldCarry);
+        cpu.set_flag(CPU::CARRY_FLAG, bOldCarry);
         cpu.update_zero_and_negative_flags(result);
         cpu.register_a = result;
     }
@@ -748,7 +748,7 @@ bool OpCode::asl(CPU& cpu, AddressingMode mode)
         byte data = cpu.mem_read(addr);
         bool bOldCarry = data >> 7;
         byte result = static_cast<byte>((data << 1) & 0xff);
-        cpu.SetFlag(CPU::CARRY_FLAG, bOldCarry);
+        cpu.set_flag(CPU::CARRY_FLAG, bOldCarry);
         cpu.update_zero_and_negative_flags(result);
         cpu.mem_write(addr, result);
     }
@@ -871,25 +871,25 @@ bool OpCode::bvs(CPU& cpu, AddressingMode mode)
 
 bool OpCode::clc(CPU& cpu, AddressingMode mode)
 {
-    cpu.SetFlag(CPU::CARRY_FLAG, false);
+    cpu.set_flag(CPU::CARRY_FLAG, false);
     return true;
 }
 
 bool OpCode::cld(CPU& cpu, AddressingMode mode)
 {
-    cpu.SetFlag(CPU::DECIMAL_FLAG, false);
+    cpu.set_flag(CPU::DECIMAL_FLAG, false);
     return true;
 }
 
 bool OpCode::cli(CPU& cpu, AddressingMode mode)
 {
-    cpu.SetFlag(CPU::INTERRUPT_FLAG, false);
+    cpu.set_flag(CPU::INTERRUPT_FLAG, false);
     return true;
 }
 
 bool OpCode::clv(CPU& cpu, AddressingMode mode)
 {
-    cpu.SetFlag(CPU::OVERFLOW_FLAG, false);
+    cpu.set_flag(CPU::OVERFLOW_FLAG, false);
     return true;
 }
 
@@ -900,9 +900,9 @@ bool OpCode::cmp_common(CPU& cpu, AddressingMode mode, byte register_data)
 
     int result = register_data - data;
 
-    cpu.SetFlag(CPU::CARRY_FLAG, register_data >= data);
-    cpu.SetFlag(CPU::ZERO_FLAG, result == 0);
-    cpu.SetFlag(CPU::NEGATIVE_FLAG, result & CPU::NEGATIVE_FLAG);
+    cpu.set_flag(CPU::CARRY_FLAG, register_data >= data);
+    cpu.set_flag(CPU::ZERO_FLAG, result == 0);
+    cpu.set_flag(CPU::NEGATIVE_FLAG, result & CPU::NEGATIVE_FLAG);
 
     return true;
 }
@@ -928,8 +928,8 @@ bool OpCode::dec(CPU& cpu, AddressingMode mode)
     byte data = cpu.mem_read(addr);
     byte result = data - 1;
     cpu.mem_write(addr, result);
-    cpu.SetFlag(CPU::ZERO_FLAG, result == 0);
-    cpu.SetFlag(CPU::NEGATIVE_FLAG, result & CPU::NEGATIVE_FLAG);
+    cpu.set_flag(CPU::ZERO_FLAG, result == 0);
+    cpu.set_flag(CPU::NEGATIVE_FLAG, result & CPU::NEGATIVE_FLAG);
 
     return true;
 }
@@ -937,16 +937,16 @@ bool OpCode::dec(CPU& cpu, AddressingMode mode)
 bool OpCode::dex(CPU& cpu, AddressingMode mode)
 {
     cpu.register_x--;
-    cpu.SetFlag(CPU::ZERO_FLAG, cpu.register_x == 0);
-    cpu.SetFlag(CPU::NEGATIVE_FLAG, cpu.register_x & CPU::NEGATIVE_FLAG);
+    cpu.set_flag(CPU::ZERO_FLAG, cpu.register_x == 0);
+    cpu.set_flag(CPU::NEGATIVE_FLAG, cpu.register_x & CPU::NEGATIVE_FLAG);
     return true;
 }
 
 bool OpCode::dey(CPU& cpu, AddressingMode mode)
 {
     cpu.register_y--;
-    cpu.SetFlag(CPU::ZERO_FLAG, cpu.register_y == 0);
-    cpu.SetFlag(CPU::NEGATIVE_FLAG, cpu.register_y & CPU::NEGATIVE_FLAG);
+    cpu.set_flag(CPU::ZERO_FLAG, cpu.register_y == 0);
+    cpu.set_flag(CPU::NEGATIVE_FLAG, cpu.register_y & CPU::NEGATIVE_FLAG);
     return true;
 }
 
@@ -956,8 +956,8 @@ bool OpCode::inc(CPU& cpu, AddressingMode mode)
     byte data = cpu.mem_read(addr);
     byte result = data + 1;
     cpu.mem_write(addr, result);
-    cpu.SetFlag(CPU::ZERO_FLAG, result == 0);
-    cpu.SetFlag(CPU::NEGATIVE_FLAG, result & CPU::NEGATIVE_FLAG);
+    cpu.set_flag(CPU::ZERO_FLAG, result == 0);
+    cpu.set_flag(CPU::NEGATIVE_FLAG, result & CPU::NEGATIVE_FLAG);
 
     return true;
 }

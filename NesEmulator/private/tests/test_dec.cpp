@@ -5,7 +5,7 @@
 
 // 辅助：检查 Z, N 标志（DEC 不影响 C, V, I, D, B）
 static void check_flags(const CPU& cpu, bool zero, bool negative) {
-    byte status = cpu.GetStatus();
+    byte status = cpu.get_status();
     assert(((status >> 1) & 1) == zero);
     assert(((status >> 7) & 1) == negative);
 }
@@ -18,9 +18,9 @@ static void test_dec_zero_page() {
     {
         CPU cpu;
         cpu.mem_write(addr, 0x01);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), static_cast<byte>(addr));
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), static_cast<byte>(addr));
+        cpu.reset_stats();
         OpCode::dec(cpu, ZeroPage);
         assert(cpu.mem_read(addr) == 0x00);
         check_flags(cpu, true, false);
@@ -31,9 +31,9 @@ static void test_dec_zero_page() {
     {
         CPU cpu;
         cpu.mem_write(addr, 0x00);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), static_cast<byte>(addr));
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), static_cast<byte>(addr));
+        cpu.reset_stats();
         OpCode::dec(cpu, ZeroPage);
         assert(cpu.mem_read(addr) == 0xFF);
         check_flags(cpu, false, true);
@@ -44,9 +44,9 @@ static void test_dec_zero_page() {
     {
         CPU cpu;
         cpu.mem_write(addr, 0x80);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), static_cast<byte>(addr));
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), static_cast<byte>(addr));
+        cpu.reset_stats();
         OpCode::dec(cpu, ZeroPage);
         assert(cpu.mem_read(addr) == 0x7F);
         check_flags(cpu, false, false);
@@ -63,11 +63,11 @@ static void test_dec_zero_page_x() {
     // 测试1：递减后结果为 0x00
     {
         CPU cpu;
-        cpu.SetRegisterX(x_val);
+        cpu.set_x(x_val);
         cpu.mem_write(target, 0x01);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), base);
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), base);
+        cpu.reset_stats();
         OpCode::dec(cpu, ZeroPage_X);
         assert(cpu.mem_read(target) == 0x00);
         check_flags(cpu, true, false);
@@ -77,11 +77,11 @@ static void test_dec_zero_page_x() {
     // 测试2：绕回，0x00 -> 0xFF
     {
         CPU cpu;
-        cpu.SetRegisterX(1);
+        cpu.set_x(1);
         cpu.mem_write(0x00, 0x00);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0xFF);
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0xFF);
+        cpu.reset_stats();
         OpCode::dec(cpu, ZeroPage_X);
         assert(cpu.mem_read(0x00) == 0xFF);
         check_flags(cpu, false, true);
@@ -97,9 +97,9 @@ static void test_dec_absolute() {
     {
         CPU cpu;
         cpu.mem_write(addr, 0x02);
-        cpu.SetPC(0x2000);
-        cpu.mem_write_u16(cpu.GetPC(), addr);
-        cpu.ResetStatus();
+        cpu.set_pc(0x2000);
+        cpu.mem_write_word(cpu.get_pc(), addr);
+        cpu.reset_stats();
         OpCode::dec(cpu, Absolute);
         assert(cpu.mem_read(addr) == 0x01);
         check_flags(cpu, false, false);
@@ -110,9 +110,9 @@ static void test_dec_absolute() {
     {
         CPU cpu;
         cpu.mem_write(addr, 0x01);
-        cpu.SetPC(0x2000);
-        cpu.mem_write_u16(cpu.GetPC(), addr);
-        cpu.ResetStatus();
+        cpu.set_pc(0x2000);
+        cpu.mem_write_word(cpu.get_pc(), addr);
+        cpu.reset_stats();
         OpCode::dec(cpu, Absolute);
         assert(cpu.mem_read(addr) == 0x00);
         check_flags(cpu, true, false);
@@ -129,11 +129,11 @@ static void test_dec_absolute_x() {
     // 测试1：正常递减
     {
         CPU cpu;
-        cpu.SetRegisterX(x_val);
+        cpu.set_x(x_val);
         cpu.mem_write(target, 0x7F);
-        cpu.SetPC(0x3000);
-        cpu.mem_write_u16(cpu.GetPC(), base);
-        cpu.ResetStatus();
+        cpu.set_pc(0x3000);
+        cpu.mem_write_word(cpu.get_pc(), base);
+        cpu.reset_stats();
         OpCode::dec(cpu, Absolute_X);
         assert(cpu.mem_read(target) == 0x7E);
         check_flags(cpu, false, false);
@@ -143,11 +143,11 @@ static void test_dec_absolute_x() {
     // 测试2：递减后负标志
     {
         CPU cpu;
-        cpu.SetRegisterX(x_val);
+        cpu.set_x(x_val);
         cpu.mem_write(target, 0x80);
-        cpu.SetPC(0x3000);
-        cpu.mem_write_u16(cpu.GetPC(), base);
-        cpu.ResetStatus();
+        cpu.set_pc(0x3000);
+        cpu.mem_write_word(cpu.get_pc(), base);
+        cpu.reset_stats();
         OpCode::dec(cpu, Absolute_X);
         assert(cpu.mem_read(target) == 0x7F);
         check_flags(cpu, false, false); // 0x7F 最高位为 0，N=0

@@ -5,7 +5,7 @@
 #include "../../public/op_code.h"
 
 static void check_flags(const CPU& cpu, bool zero, bool negative) {
-    byte status = cpu.GetStatus();
+    byte status = cpu.get_status();
     assert(((status >> 1) & 1) == zero);
     assert(((status >> 7) & 1) == negative);
 }
@@ -18,9 +18,9 @@ static void test_inc_zero_page() {
     {
         CPU cpu;
         cpu.mem_write(addr, 0x12);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), static_cast<byte>(addr));
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), static_cast<byte>(addr));
+        cpu.reset_stats();
         OpCode::inc(cpu, ZeroPage);
         assert(cpu.mem_read(addr) == 0x13);
         check_flags(cpu, false, false);
@@ -31,9 +31,9 @@ static void test_inc_zero_page() {
     {
         CPU cpu;
         cpu.mem_write(addr, 0xFF);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), static_cast<byte>(addr));
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), static_cast<byte>(addr));
+        cpu.reset_stats();
         OpCode::inc(cpu, ZeroPage);
         assert(cpu.mem_read(addr) == 0x00);
         check_flags(cpu, true, false);
@@ -44,9 +44,9 @@ static void test_inc_zero_page() {
     {
         CPU cpu;
         cpu.mem_write(addr, 0x7F);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), static_cast<byte>(addr));
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), static_cast<byte>(addr));
+        cpu.reset_stats();
         OpCode::inc(cpu, ZeroPage);
         assert(cpu.mem_read(addr) == 0x80);
         check_flags(cpu, false, true);
@@ -62,11 +62,11 @@ static void test_inc_zero_page_x() {
 
     {
         CPU cpu;
-        cpu.SetRegisterX(x_val);
+        cpu.set_x(x_val);
         cpu.mem_write(target, 0x01);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), base);
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), base);
+        cpu.reset_stats();
         OpCode::inc(cpu, ZeroPage_X);
         assert(cpu.mem_read(target) == 0x02);
         check_flags(cpu, false, false);
@@ -76,11 +76,11 @@ static void test_inc_zero_page_x() {
     // 绕回测试：0xFF + 1 = 0x00
     {
         CPU cpu;
-        cpu.SetRegisterX(1);
+        cpu.set_x(1);
         cpu.mem_write(0x00, 0xFF);
-        cpu.SetPC(0x1000);
-        cpu.mem_write(cpu.GetPC(), 0xFF);
-        cpu.ResetStatus();
+        cpu.set_pc(0x1000);
+        cpu.mem_write(cpu.get_pc(), 0xFF);
+        cpu.reset_stats();
         OpCode::inc(cpu, ZeroPage_X);
         assert(cpu.mem_read(0x00) == 0x00);
         check_flags(cpu, true, false);
@@ -95,9 +95,9 @@ static void test_inc_absolute() {
     {
         CPU cpu;
         cpu.mem_write(addr, 0x01);
-        cpu.SetPC(0x2000);
-        cpu.mem_write_u16(cpu.GetPC(), addr);
-        cpu.ResetStatus();
+        cpu.set_pc(0x2000);
+        cpu.mem_write_word(cpu.get_pc(), addr);
+        cpu.reset_stats();
         OpCode::inc(cpu, Absolute);
         assert(cpu.mem_read(addr) == 0x02);
         check_flags(cpu, false, false);
@@ -108,9 +108,9 @@ static void test_inc_absolute() {
     {
         CPU cpu;
         cpu.mem_write(addr, 0xFF);
-        cpu.SetPC(0x2000);
-        cpu.mem_write_u16(cpu.GetPC(), addr);
-        cpu.ResetStatus();
+        cpu.set_pc(0x2000);
+        cpu.mem_write_word(cpu.get_pc(), addr);
+        cpu.reset_stats();
         OpCode::inc(cpu, Absolute);
         assert(cpu.mem_read(addr) == 0x00);
         check_flags(cpu, true, false);
@@ -126,11 +126,11 @@ static void test_inc_absolute_x() {
 
     {
         CPU cpu;
-        cpu.SetRegisterX(x_val);
+        cpu.set_x(x_val);
         cpu.mem_write(target, 0x7F);
-        cpu.SetPC(0x3000);
-        cpu.mem_write_u16(cpu.GetPC(), base);
-        cpu.ResetStatus();
+        cpu.set_pc(0x3000);
+        cpu.mem_write_word(cpu.get_pc(), base);
+        cpu.reset_stats();
         OpCode::inc(cpu, Absolute_X);
         assert(cpu.mem_read(target) == 0x80);
         check_flags(cpu, false, true);
@@ -143,11 +143,11 @@ static void test_inc_absolute_x() {
         word base2 = 0x12FF;
         byte x_val2 = 2;
         word target2 = base2 + x_val2; // 0x1301
-        cpu.SetRegisterX(x_val2);
+        cpu.set_x(x_val2);
         cpu.mem_write(target2, 0x00);
-        cpu.SetPC(0x3000);
-        cpu.mem_write_u16(cpu.GetPC(), base2);
-        cpu.ResetStatus();
+        cpu.set_pc(0x3000);
+        cpu.mem_write_word(cpu.get_pc(), base2);
+        cpu.reset_stats();
         OpCode::inc(cpu, Absolute_X);
         assert(cpu.mem_read(target2) == 0x01);
         check_flags(cpu, false, false);
