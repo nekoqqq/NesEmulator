@@ -25,6 +25,7 @@ void test_cpy();
 void test_dec();
 void test_dex();
 void test_dey();
+void test_eor();
 
 int main()
 {
@@ -52,4 +53,5 @@ int main()
     test_dec();
     test_dex();
     test_dey();
+    test_eor();
 }
