@@ -39,6 +39,7 @@ void test_nop();
 void test_ora();
 void test_pha();
 void test_php();
+void test_pla();
 
 int main()
 {
@@ -80,4 +81,5 @@ int main()
     test_ora();
     test_pha();
     test_php();
+    test_pla();
 }

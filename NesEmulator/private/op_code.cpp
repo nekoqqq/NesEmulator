@@ -238,7 +238,10 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0x48, "PHA", 1, 3, Implied, &pha),
 
         // PHP - Push Processor Status
-        OpCode(0x08, "PHA", 1, 3, Implied, &php),
+        OpCode(0x08, "PHP", 1, 3, Implied, &php),
+
+        // PLA - Pull Accumulator
+        OpCode(0x68, "PLA", 1, 3, Implied, &pla),
 
 
     };
@@ -436,6 +439,16 @@ bool OpCode::php(CPU& cpu, AddressingMode mode)
      */
     cpu.mem_write(cpu.stack_pointer + 0x0100, cpu.status | CPU::BREAK_FLAG);
     cpu.stack_pointer--;
+
+    return true;
+}
+
+bool OpCode::pla(CPU& cpu, AddressingMode mode)
+{
+    cpu.stack_pointer++;
+    cpu.register_a = cpu.mem_read(cpu.stack_pointer + 0x0100);
+    cpu.SetFlag(CPU::ZERO_FLAG, cpu.register_a == 0);
+    cpu.SetFlag(CPU::NEGATIVE_FLAG, cpu.register_a & CPU::NEGATIVE_FLAG);
 
     return true;
 }
