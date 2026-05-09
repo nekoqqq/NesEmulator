@@ -36,6 +36,7 @@ void test_ldx();
 void test_ldy();
 void test_lsr();
 void test_nop();
+void test_ora();
 
 int main()
 {
@@ -74,4 +75,5 @@ int main()
     test_ldy();
     test_lsr();
     test_nop();
+    test_ora();
 }

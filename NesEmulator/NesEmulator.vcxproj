@@ -322,6 +322,9 @@
   <ItemGroup>
     <ClCompile Include="private\tests\test_adc.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="private\tests\test_ora.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
