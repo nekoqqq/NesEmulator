@@ -49,6 +49,9 @@ void test_sbc();
 void test_sec();
 void test_sed();
 void test_sei();
+void test_sta();
+void test_stx();
+void test_sty();
 
 int main()
 {
@@ -100,4 +103,7 @@ int main()
     test_sec();
     test_sed();
     test_sei();
+    test_sta();
+    test_stx();
+    test_sty();
 }

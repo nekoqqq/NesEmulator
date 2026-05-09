@@ -128,8 +128,18 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0x81, "STA", 2, 6, Indirect_X, &sta),
         OpCode(0x91, "STA", 2, 6, Indirect_D_Y, &sta),
 
+        // STX - Store X Register
+        OpCode(0x86, "STX", 2, 3, ZeroPage, &stx),
+        OpCode(0x96, "STX", 2, 4, ZeroPage_Y, &stx),
+        OpCode(0x8E, "STX", 3, 4, Absolute, &stx),
 
-        // SBC - Subtract with Carray
+        // STY - Store Y Register
+        OpCode(0x84, "STY", 2, 3, ZeroPage, &sty),
+        OpCode(0x94, "STY", 2, 4, ZeroPage_X, &sty),
+        OpCode(0x8C, "STY", 3, 4, Absolute, &sty),
+
+
+        // SBC - Subtract with Carry
         OpCode(0xe9, "SBC", 2, 2, Immediate, &sbc),
         OpCode(0xe5, "SBC", 2, 3, ZeroPage, &sbc),
         OpCode(0xf5, "SBC", 2, 4, ZeroPage_X, &sbc),
@@ -599,6 +609,22 @@ bool OpCode::sed(CPU& cpu, AddressingMode mode)
 bool OpCode::sei(CPU& cpu, AddressingMode mode)
 {
     cpu.SetFlag(CPU::INTERRUPT_FLAG, true);
+    return true;
+}
+
+bool OpCode::stx(CPU& cpu, AddressingMode mode)
+{
+    word addr = cpu.get_operand_address(mode);
+    cpu.mem_write(addr, cpu.register_x);
+
+    return true;
+}
+
+bool OpCode::sty(CPU& cpu, AddressingMode mode)
+{
+    word addr = cpu.get_operand_address(mode);
+    cpu.mem_write(addr, cpu.register_y);
+
     return true;
 }
 

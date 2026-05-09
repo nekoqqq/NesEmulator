@@ -250,6 +250,9 @@
     <ClCompile Include="private\tests\test_sec.cpp" />
     <ClCompile Include="private\tests\test_sed.cpp" />
     <ClCompile Include="private\tests\test_sei.cpp" />
+    <ClCompile Include="private\tests\test_sta.cpp" />
+    <ClCompile Include="private\tests\test_stx.cpp" />
+    <ClCompile Include="private\tests\test_sty.cpp" />
     <ClCompile Include="public\platform_common.h">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>

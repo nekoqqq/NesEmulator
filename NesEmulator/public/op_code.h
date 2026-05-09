@@ -100,5 +100,8 @@ struct OpCode
     static bool sed(CPU&cpu, AddressingMode mode);
     static bool sei(CPU&cpu, AddressingMode mode);
     
+    static bool stx(CPU&cpu, AddressingMode mode);
+    static bool sty(CPU&cpu, AddressingMode mode);
+    
     
 };
