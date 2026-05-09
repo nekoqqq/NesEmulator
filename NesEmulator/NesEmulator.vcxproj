@@ -232,6 +232,7 @@
     <ClCompile Include="private\tests\test_inx.cpp" />
     <ClCompile Include="private\tests\test_iny.cpp" />
     <ClCompile Include="private\tests\test_jmp.cpp" />
+    <ClCompile Include="private\tests\test_jsr.cpp" />
     <ClCompile Include="public\platform_common.h">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>

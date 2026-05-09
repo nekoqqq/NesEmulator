@@ -79,4 +79,5 @@ struct OpCode
     static bool iny(CPU& cpu, AddressingMode mode);
     
     static bool jmp(CPU& cpu, AddressingMode mode); // todo 6502 有个跳转的bug，addr低字节为0xff时高字节从同一页的0x00读取而非跨页，需要特殊处理，不过可以先实现标准行为
+    static bool jsr(CPU& cpu, AddressingMode mode);
 };

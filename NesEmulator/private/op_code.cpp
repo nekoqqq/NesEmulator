@@ -205,8 +205,11 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0xC8, "INY", 1, 2, Implied, &iny),
 
         // JMP - Jump
-        OpCode(0xC8, "INY", 3, 3, Absolute, &jmp),
-        OpCode(0xC8, "INY", 3, 5, Indirect, &jmp),
+        OpCode(0xC8, "JMP", 3, 3, Absolute, &jmp),
+        OpCode(0xC8, "JMP", 3, 5, Indirect, &jmp),
+
+        // JSR - Jump to Subroutine
+        OpCode(0x20, "JSR", 3, 6, Absolute, &jsr),
 
 
     };
@@ -338,6 +341,20 @@ bool OpCode::iny(CPU& cpu, AddressingMode mode)
 bool OpCode::jmp(CPU& cpu, AddressingMode mode)
 {
     word addr = cpu.get_operand_address(mode);
+    cpu.program_counter = addr;
+
+    return true;
+}
+
+bool OpCode::jsr(CPU& cpu, AddressingMode mode)
+{
+    word addr = cpu.get_operand_address(mode);
+    word return_addr = cpu.program_counter + 2;
+    
+    cpu.mem_write(cpu.stack_pointer + 0x0100, (return_addr >> 8) & 0xFF);
+    cpu.stack_pointer--;
+    cpu.mem_write(0x0100 + cpu.stack_pointer, return_addr & 0xFF);
+    cpu.stack_pointer--;
     cpu.program_counter = addr;
 
     return true;
