@@ -318,12 +318,12 @@ bool OpCode::asr(CPU& cpu, AddressingMode mode)
 
 bool OpCode::bcc(CPU& cpu, AddressingMode mode)
 {
-    // if carry clear
     int8_t jump = cpu.mem_read(cpu.program_counter);
+    // if carry clear
     cpu.program_counter++; // 注意分支指令的这个操作
     if ((cpu.status & CPU::CARRY_FLAG << 0) == 0)
     {
-        word jump_addr = cpu.program_counter  + jump; // +1是因为要从下个指令的地址开始，加上这个跳转的数值
+        word jump_addr = cpu.program_counter + jump; // +1是因为要从下个指令的地址开始，加上这个跳转的数值
         cpu.program_counter = jump_addr;
     }
     return true;
@@ -331,11 +331,12 @@ bool OpCode::bcc(CPU& cpu, AddressingMode mode)
 
 bool OpCode::bcs(CPU& cpu, AddressingMode mode)
 {
+    int8_t jump = cpu.mem_read(cpu.program_counter);
     // if carry clear
-    if ((cpu.status & 1 << 0) == 1)
+    cpu.program_counter++;
+    if ((cpu.status & CPU::CARRY_FLAG << 0) == 1)
     {
-        int8_t jump = cpu.mem_read(cpu.program_counter);
-        word jump_addr = cpu.program_counter + 1 + jump; // +1是因为要从下个指令的地址开始，加上这个跳转的数值
+        word jump_addr = cpu.program_counter + jump; // +1是因为要从下个指令的地址开始，加上这个跳转的数值
         cpu.program_counter = jump_addr;
     }
     return true;
