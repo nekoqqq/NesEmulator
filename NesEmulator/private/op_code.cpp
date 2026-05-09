@@ -176,6 +176,12 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0xC1, "CMP", 2, 6, Indirect_X, &cmp),
         OpCode(0xD1, "CMP", 2, 5, Indirect_D_Y, &cmp), // (+1 if page crossed)
 
+        // CPX - Compare X Register
+        OpCode(0xE0, "CPX ", 2, 2, Immediate, &cpx),
+        OpCode(0xE4, "CPX ", 2, 3, ZeroPage, &cpx),
+        OpCode(0xEC, "CPX ", 3, 4, Absolute, &cpx)
+
+
     };
     return cpu_ops_code;
 }();
@@ -509,16 +515,26 @@ bool OpCode::clv(CPU& cpu, AddressingMode mode)
     return true;
 }
 
-bool OpCode::cmp(CPU& cpu, AddressingMode mode)
+bool OpCode::cmp_common(CPU& cpu, AddressingMode mode, byte register_data)
 {
     word addr = cpu.get_operand_address(mode);
     byte data = cpu.mem_read(addr);
 
-    int result = cpu.register_a - data;
+    int result = register_data - data;
 
-    cpu.SetFlag(CPU::CARRY_FLAG, cpu.register_a >= data);
+    cpu.SetFlag(CPU::CARRY_FLAG, register_data >= data);
     cpu.SetFlag(CPU::ZERO_FLAG, result == 0);
     cpu.SetFlag(CPU::NEGATIVE_FLAG, result & CPU::NEGATIVE_FLAG);
-    
+
     return true;
+}
+
+bool OpCode::cmp(CPU& cpu, AddressingMode mode)
+{
+    return cmp_common(cpu, mode, cpu.register_a);
+}
+
+bool OpCode::cpx(CPU& cpu, AddressingMode mode)
+{
+    return cmp_common(cpu, mode, cpu.register_x);
 }

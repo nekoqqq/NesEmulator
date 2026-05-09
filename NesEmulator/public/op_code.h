@@ -67,5 +67,7 @@ struct OpCode
     static bool cld(CPU& cpu, AddressingMode mode);
     static bool cli(CPU& cpu, AddressingMode mode);
     static bool clv(CPU& cpu, AddressingMode mode);
+    static bool cmp_common(CPU&cpu, AddressingMode mode,byte register_data);
     static bool cmp(CPU& cpu, AddressingMode mode);
+    static bool cpx(CPU& cpu, AddressingMode mode);
 };
