@@ -241,6 +241,7 @@
     <ClCompile Include="private\tests\test_pha.cpp" />
     <ClCompile Include="private\tests\test_php.cpp" />
     <ClCompile Include="private\tests\test_pla.cpp" />
+    <ClCompile Include="private\tests\test_plp.cpp" />
     <ClCompile Include="public\platform_common.h">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
