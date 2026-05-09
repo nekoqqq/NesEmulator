@@ -4,6 +4,7 @@
 using std::vector;
 
 using byte = unsigned char;
+using word = uint16_t;
 using program = vector<byte>;
 
 // 寻址方式

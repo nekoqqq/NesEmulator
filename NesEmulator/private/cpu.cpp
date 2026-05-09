@@ -22,24 +22,24 @@ void CPU::load_and_run_no_reset(program& prog)
     run();
 }
 
-byte CPU::mem_read(uint16_t addr) const
+byte CPU::mem_read(word addr) const
 {
     return memory[addr];
 }
 
-void CPU::mem_write(uint16_t addr, byte data)
+void CPU::mem_write(word addr, byte data)
 {
     memory[addr] = data;
 }
 
-uint16_t CPU::mem_read_u16(uint16_t pos) const
+word CPU::mem_read_u16(word pos) const
 {
-    uint16_t lo = mem_read(pos);
-    uint16_t hi = mem_read(pos + 1);
+    word lo = mem_read(pos);
+    word hi = mem_read(pos + 1);
     return hi << 8 | lo;
 }
 
-void CPU::mem_write_u16(uint16_t pos, uint16_t data)
+void CPU::mem_write_u16(word pos, word data)
 {
     byte hi = (data >> 8); // 高8位
     byte lo = (data & 0xff); // 低8位

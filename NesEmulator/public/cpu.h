@@ -24,13 +24,16 @@ public:
     void load_and_run(program& prog);
     // 不清空直接运行
     void load_and_run_no_reset(program& prog);
-    byte mem_read(uint16_t addr) const;
-    void mem_write(uint16_t addr, byte data);
+    /*
+     *内存读取相关
+     */
+    byte mem_read(word addr) const;
+    void mem_write(word addr, byte data);
     // 给一个16位的地址，需要读取连续两个字节的数据，也就是连续两行的数据，这两行的数据再根据小端的方式拼接
-    uint16_t mem_read_u16(uint16_t pos) const;
+    word mem_read_u16(word pos) const;
     // 给一个16位的地址，写入一个16位的操作数，用小端的方式，先写低八位的数据，再写高8位的数据
     // 记住，内存总共64KB大小，总共有64K行，每行都是8位，存一个Byte，数据就存在这些cell里面
-    void mem_write_u16(uint16_t pos, uint16_t data);
+    void mem_write_u16(word pos, uint16_t data);
 
 protected:
     // 输出的处理函数
@@ -73,5 +76,4 @@ public: // public getter
     void SetRegisterX(byte newRegisterX) { register_x = newRegisterX; }
     const byte& GetRegisterY() const { return register_y; }
     void SetRegisterY(byte newRegisterY) { register_y = newRegisterY; }
-    
 };
