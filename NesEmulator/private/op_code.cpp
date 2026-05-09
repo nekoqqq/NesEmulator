@@ -103,6 +103,21 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0xa1, "LDA", 2, 6, Indirect_X, &lda),
         OpCode(0xb1, "LDA", 2, 5, Indirect_D_Y, &lda), // +1 if page crossed
 
+        // LDX - Load X Register
+        OpCode(0xA2, "LDX", 2, 2, Immediate, &ldx),
+        OpCode(0xA6, "LDX", 2, 3, ZeroPage, &ldx),
+        OpCode(0xB6, "LDX", 2, 4, ZeroPage_Y, &ldx),
+        OpCode(0xAE, "LDX", 3, 4, Absolute, &ldx),
+        OpCode(0xBE, "LDX", 3, 4, Absolute_Y, &ldx), // +1 if page crossed
+
+
+        // LDY - Load Y Register
+        OpCode(0xA0, "LDY", 2, 2, Immediate, &ldy),
+        OpCode(0xA4, "LDY", 2, 3, ZeroPage, &ldy),
+        OpCode(0xB4, "LDY", 2, 4, ZeroPage_X, &ldy),
+        OpCode(0xAC, "LDY", 3, 4, Absolute, &ldy),
+        OpCode(0xBC, "LDY", 3, 4, Absolute_X, &ldy), // +1 if page crossed
+
         // STA - Store Accumulator
         OpCode(0x85, "STA", 2, 3, ZeroPage, &sta),
         OpCode(0x95, "STA", 2, 4, ZeroPage_X, &sta),
@@ -290,20 +305,8 @@ bool OpCode::brk(CPU& cpu, AddressingMode mode)
 
 bool OpCode::lda(CPU& cpu, AddressingMode mode)
 {
-    if (mode == Immediate)
-    {
-        cpu.register_a = cpu.mem_read(cpu.program_counter++);
-        cpu.update_zero_and_negative_flags(cpu.register_a);
-    }
-    else
-    {
-        word addr = cpu.get_operand_address(mode);
-        byte value = cpu.mem_read(addr);
-
-        cpu.register_a = value;
-        cpu.update_zero_and_negative_flags(cpu.register_a);
-    }
-
+    cpu.register_a = cpu.mem_read(cpu.get_operand_address(mode));
+    cpu.update_zero_and_negative_flags(cpu.register_a);
     return true;
 }
 
@@ -350,7 +353,7 @@ bool OpCode::jsr(CPU& cpu, AddressingMode mode)
 {
     word addr = cpu.get_operand_address(mode);
     word return_addr = cpu.program_counter + 2;
-    
+
     cpu.mem_write(cpu.stack_pointer + 0x0100, (return_addr >> 8) & 0xFF);
     cpu.stack_pointer--;
     cpu.mem_write(0x0100 + cpu.stack_pointer, return_addr & 0xFF);
@@ -359,6 +362,23 @@ bool OpCode::jsr(CPU& cpu, AddressingMode mode)
 
     return true;
 }
+
+bool OpCode::ldx(CPU& cpu, AddressingMode mode)
+{
+    cpu.register_x = cpu.mem_read(cpu.get_operand_address(mode));
+    cpu.update_zero_and_negative_flags(cpu.register_x);
+    return true;
+    return true;
+}
+
+bool OpCode::ldy(CPU& cpu, AddressingMode mode)
+{
+    cpu.register_y = cpu.mem_read(cpu.get_operand_address(mode));
+    cpu.update_zero_and_negative_flags(cpu.register_y);
+    return true;
+    return true;
+}
+
 
 bool OpCode::adc(CPU& cpu, AddressingMode mode)
 {

@@ -31,6 +31,9 @@ void test_inx();
 void test_iny();
 void test_jmp();
 void test_jsr();
+void test_lda();
+void test_ldx();
+void test_ldy();
 
 int main()
 {
@@ -64,4 +67,7 @@ int main()
     test_iny();
     test_jmp();
     test_jsr();
+    test_lda();
+    test_ldx();
+    test_ldy();
 }
