@@ -90,4 +90,7 @@ struct OpCode
     static bool pla(CPU&cpu, AddressingMode mode);
     static bool plp(CPU&cpu, AddressingMode mode);
     
+    static bool rol(CPU&cpu, AddressingMode mode);
+    static bool ror(CPU&cpu, AddressingMode mode);
+    
 };

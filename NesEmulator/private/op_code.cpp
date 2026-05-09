@@ -246,6 +246,13 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         // PLP - Pull Processor Status
         OpCode(0x28, "PLP", 1, 4, Implied, &plp),
 
+        // ROL - Rotate Left
+        OpCode(0x2A, "ROL", 1, 2, Accumulator, &rol),
+        OpCode(0x26, "ROL", 2, 5, ZeroPage, &rol),
+        OpCode(0x36, "ROL", 2, 6, ZeroPage_X, &rol),
+        OpCode(0x2E, "ROL", 3, 6, Absolute, &rol),
+        OpCode(0x3E, "ROL", 3, 7, Absolute_X, &rol),
+
 
     };
     return cpu_ops_code;
@@ -462,6 +469,64 @@ bool OpCode::plp(CPU& cpu, AddressingMode mode)
     cpu.status = cpu.mem_read(cpu.stack_pointer + 0x0100);
     cpu.SetFlag(CPU::BREAK_FLAG | CPU::UNUSED_FLAG, false); // 清除 bit4 和 bit5
 
+    return true;
+}
+
+bool OpCode::rol(CPU& cpu, AddressingMode mode)
+{
+    if (mode == Accumulator)
+    {
+        byte data = cpu.register_a;
+        bool carry_in = cpu.GetFlag(CPU::CARRY_FLAG);
+        bool carry_out = (data & CPU::NEGATIVE_FLAG) != 0;
+        byte result = (data << 1) | (carry_in ? 1 : 0);
+        cpu.register_a = result;
+        cpu.SetFlag(CPU::CARRY_FLAG, carry_out);
+        cpu.SetFlag(CPU::ZERO_FLAG, result == 0);
+        cpu.SetFlag(CPU::NEGATIVE_FLAG, result & CPU::NEGATIVE_FLAG);
+    }
+    else
+    {
+        word addr = cpu.get_operand_address(mode);
+        byte data = cpu.mem_read(addr);
+        bool carry_in = cpu.GetFlag(CPU::CARRY_FLAG);
+        bool carry_out = (data & 0x80) != 0;
+        byte result = (data << 1) | (carry_in ? 1 : 0);
+        cpu.mem_write(addr, result);
+        cpu.SetFlag(CPU::CARRY_FLAG, carry_out);
+        cpu.SetFlag(CPU::ZERO_FLAG, result == 0);
+        cpu.SetFlag(CPU::NEGATIVE_FLAG, result & 0x80);
+    }
+
+    return true;
+}
+
+bool OpCode::ror(CPU& cpu, AddressingMode mode)
+{
+    if (mode == Accumulator)
+    {
+        byte data = cpu.register_a;
+        bool carry_in = cpu.GetFlag(CPU::CARRY_FLAG);
+        bool carry_out = (data & CPU::CARRY_FLAG) != 0;
+        byte result = (data >> 1) | (carry_in ? CPU::NEGATIVE_FLAG : 0);
+        cpu.register_a = result;
+        cpu.SetFlag(CPU::CARRY_FLAG, carry_out);
+        cpu.SetFlag(CPU::ZERO_FLAG, result == 0);
+        cpu.SetFlag(CPU::NEGATIVE_FLAG, result & CPU::NEGATIVE_FLAG);
+    }
+    else
+    {
+        word addr = cpu.get_operand_address(mode);
+        byte data = cpu.mem_read(addr);
+        bool carry_in = cpu.GetFlag(CPU::CARRY_FLAG);
+        bool carry_out = (data & CPU::CARRY_FLAG) != 0;
+        byte result = (data >> 1) | (carry_in ? CPU::NEGATIVE_FLAG : 0);
+        cpu.mem_write(addr, result);
+        cpu.SetFlag(CPU::CARRY_FLAG, carry_out);
+        cpu.SetFlag(CPU::ZERO_FLAG, result == 0);
+        cpu.SetFlag(CPU::NEGATIVE_FLAG, result & CPU::NEGATIVE_FLAG);
+    }
+    
     return true;
 }
 

@@ -101,4 +101,9 @@ public: // public getter
         else
             status &= ~mask;
     }
+
+    bool GetFlag(byte mask) const
+    {
+        return status & mask;
+    }
 };

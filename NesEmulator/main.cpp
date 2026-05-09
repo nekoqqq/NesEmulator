@@ -41,6 +41,8 @@ void test_pha();
 void test_php();
 void test_pla();
 void test_plp();
+void test_rol();
+void test_ror();
 
 int main()
 {
@@ -84,4 +86,6 @@ int main()
     test_php();
     test_pla();
     test_plp();
+    test_rol();
+    test_ror();
 }
