@@ -36,6 +36,8 @@ public:
     void mem_write_u16(word pos, uint16_t data);
 
     // 常量定义
+    // 程序状态字寄存器, N V _ B D I Z C
+    //				  7 6 5 4 3 2 1 0
     static constexpr byte CARRY_FLAG = 0x01;
     static constexpr byte ZERO_FLAG = 0x02;
     static constexpr byte INTERRUPT_FLAG = 0x04;
@@ -44,7 +46,6 @@ public:
     static constexpr byte UNUSED_FLAG = 0x20;
     static constexpr byte OVERFLOW_FLAG = 0x40;
     static constexpr byte NEGATIVE_FLAG = 0x80;
-
 
 protected:
     // 输出的处理函数
@@ -72,8 +73,7 @@ private:
     byte register_x;
     byte register_y;
 
-    // 程序状态字寄存器, N V _ B D I Z C
-    //				  7 6 5 4 3 2 1 0
+
     byte status;
 
     // 内存 address space,虚拟地址空间,CPU只有2KB的RAM，其他的都是用来做内存映射

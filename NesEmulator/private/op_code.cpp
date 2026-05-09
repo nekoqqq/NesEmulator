@@ -141,6 +141,11 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
 
         // BPL - Branch on Plus
         OpCode(0xD0, "BPL", 2, 2, NoneAddressing, &bpl), // +1 if branch succeeds +2 if to a new page
+
+        // BIT - Bit Test
+        OpCode(0x24, "BIT", 2, 3, ZeroPage, &bit), // +1 if branch succeeds +2 if to a new page
+        OpCode(0x2C, "BIT", 3, 4, Absolute, &bit), // +1 if branch succeeds +2 if to a new page
+
     };
     return cpu_ops_code;
 }();
@@ -155,6 +160,23 @@ unordered_map<byte, OpCode> OpCode::OPCODES_MAP = []()
     }
     return op_code_map;
 }();
+
+bool OpCode::bit(CPU& cpu, AddressingMode mode)
+{
+    word addr = cpu.get_operand_address(mode);
+    byte value = cpu.mem_read(addr);
+
+    byte result = cpu.register_a & value;
+
+    // 设置Z标志
+    cpu.SetFlag(CPU::ZERO_FLAG, result == 0);
+
+    cpu.SetFlag(CPU::NEGATIVE_FLAG, value & CPU::NEGATIVE_FLAG);
+
+    cpu.SetFlag(CPU::OVERFLOW_FLAG, value & CPU::OVERFLOW_FLAG);
+    
+    return true;
+}
 
 bool OpCode::op_and(CPU& cpu, AddressingMode mode)
 {
