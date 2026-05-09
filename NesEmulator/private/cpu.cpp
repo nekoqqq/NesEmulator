@@ -190,21 +190,21 @@ uint16_t CPU::get_operand_address(AddressingMode& mode) const
     case AddressingMode::ZeroPage_Y:
         {
             byte pos = mem_read(program_counter);
-            address = pos + (int)register_y; // 指针偏移
+            address = pos + register_y; // 指针偏移
         }
         break;
 
     case AddressingMode::Absolute_X:
         {
             uint16_t base = mem_read_u16(program_counter);
-            address = base + (int)register_x; // 指针偏移
+            address = base + register_x; // 指针偏移
         }
         break;
 
     case AddressingMode::Absolute_Y:
         {
             uint16_t base = mem_read_u16(program_counter);
-            address = base + (int)register_y; // 指针偏移
+            address = base + register_y; // 指针偏移
         }
         break;
 
@@ -214,7 +214,7 @@ uint16_t CPU::get_operand_address(AddressingMode& mode) const
         {
             byte base = mem_read(program_counter);
 
-            byte ptr = base + (int)register_x;
+            byte ptr = base + register_x;
             byte lo = mem_read(ptr);
             byte hi = mem_read(ptr + 1);
             address = hi << 8 | lo;
@@ -225,7 +225,7 @@ uint16_t CPU::get_operand_address(AddressingMode& mode) const
         {
             byte base = mem_read(program_counter);
 
-            byte ptr = base + (int)register_y;
+            byte ptr = base + register_y;
             byte lo = mem_read(ptr);
             byte hi = mem_read(ptr + 1);
             address = hi << 8 | lo;
@@ -234,14 +234,11 @@ uint16_t CPU::get_operand_address(AddressingMode& mode) const
 
 
     case AddressingMode::NoneAddressing:
+    default:
         {
             printf("not supported mode: %d", mode);
             throw "not supported mode";
         }
-        break;
-
-    default:
-        break;
     }
 
     return address;
