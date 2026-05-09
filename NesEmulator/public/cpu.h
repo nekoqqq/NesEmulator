@@ -24,7 +24,6 @@ public:
     void load_and_run(program& prog);
     // 不清空直接运行
     void load_and_run_no_reset(program& prog);
-    
     byte mem_read(uint16_t addr) const;
     void mem_write(uint16_t addr, byte data);
     // 给一个16位的地址，需要读取连续两个字节的数据，也就是连续两行的数据，这两行的数据再根据小端的方式拼接
@@ -44,13 +43,12 @@ private:
     // 重置寄存器的状态，将program_counter的值设置为在内存0xFFFC处存储的2个字节的值
     void reset();
     // 运行内存中的程序
-    void run(); 
+    void run();
     // 通用的设置寄存器的函数
     void update_zero_and_negative_flags(byte res);
     uint16_t get_operand_address(AddressingMode& mode) const;
     void add_to_register_a(byte value);
 
-public: // 暂时不封装，TODO后面还是需要封装下
     // 程序计数器
     uint16_t program_counter;
     byte stack_pointer;
@@ -66,4 +64,14 @@ public: // 暂时不封装，TODO后面还是需要封装下
 
     // 内存 address space,虚拟地址空间,CPU只有2KB的RAM，其他的都是用来做内存映射
     byte memory[MEM_SIZE];
+
+public: // public getter
+    const byte& GetStatus() const { return status; }
+    const byte& GetRegisterA() const { return register_a; }
+    void SetRegisterA(byte newRegisterA) { register_a = newRegisterA; }
+    const byte& GetRegisterX() const { return register_x; }
+    void SetRegisterX(byte newRegisterX) { register_x = newRegisterX; }
+    const byte& GetRegisterY() const { return register_y; }
+    void SetRegisterY(byte newRegisterY) { register_y = newRegisterY; }
+    
 };

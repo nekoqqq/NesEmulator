@@ -21,9 +21,9 @@ int main()
         cout << cpu << endl;
         vector<byte> test{0xa9, 0x05, 0x00};
         cpu->load_and_run(test);
-        assert(cpu->register_a == 0x05);
-        assert((cpu->status & 0x02) == 0); // &运算符优先级比==更加的低
-        assert((cpu->status & 0x80) == 0);
+        assert(cpu->GetRegisterA() == 0x05);
+        assert((cpu->GetStatus() & 0x02) == 0); // &运算符优先级比==更加的低
+        assert((cpu->GetStatus() & 0x80) == 0);
         cout << cpu << endl;
         cout << "Test passed: " << test_cnt++ << endl;
     }
@@ -34,7 +34,7 @@ int main()
         cout << cpu << endl;
         vector<byte> test{0xa9, 0x00, 0x00};
         cpu->load_and_run(test);
-        assert((cpu->status & 0x02) == 0x02);
+        assert((cpu->GetStatus() & 0x02) == 0x02);
         cout << cpu << endl;
         cout << "Test passed: " << test_cnt++ << endl;
     }
@@ -43,10 +43,10 @@ int main()
     {
         CPU* cpu = new CPU();
         cout << cpu << endl;
-        cpu->register_a = 10;
+        cpu->SetRegisterA(10);
         vector<byte> test{0xaa, 0x00};
         cpu->load_and_run_no_reset(test);
-        assert(cpu->register_x == 10);
+        assert(cpu->GetRegisterX() == 10);
         cout << cpu << endl;
         cout << "Test passed: " << test_cnt++ << endl;
     }
@@ -57,7 +57,7 @@ int main()
         cout << cpu << endl;
         vector<byte> test{0xa9, 0xc0, 0xaa, 0xe8, 0x00};
         cpu->load_and_run_no_reset(test);
-        assert(cpu->register_x == 0xc1);
+        assert(cpu->GetRegisterX() == 0xc1);
         cout << cpu << endl;
         cout << "Test passed: " << test_cnt++ << endl;
     }
@@ -66,10 +66,10 @@ int main()
     {
         CPU* cpu = new CPU();
         cout << cpu << endl;
-        cpu->register_x = 0xff;
+        cpu->SetRegisterX( 0xff);
         vector<byte> test{0xe8, 0xe8, 0x00};
         cpu->load_and_run_no_reset(test);
-        assert(cpu->register_x == 0x01);
+        assert(cpu->GetRegisterX() == 0x01);
         cout << cpu << endl;
         cout << "Test passed: " << test_cnt++ << endl;
     }
@@ -78,10 +78,10 @@ int main()
     {
         CPU* cpu = new CPU();
         cout << cpu << endl;
-        cpu->register_y = 0xff;
+        cpu->SetRegisterY(0xff);
         vector<byte> test{0xc8, 0xc8, 0x00};
         cpu->load_and_run_no_reset(test);
-        assert(cpu->register_y == 0x01);
+        assert(cpu->GetRegisterY() == 0x01);
         cout << cpu << endl;
         cout << "Test passed: " << test_cnt++ << endl;
     }
@@ -94,7 +94,7 @@ int main()
         cpu->mem_write(0x10, 0x55);
         cpu->load_and_run(program);
         cout << cpu << endl;
-        assert(cpu->register_a == 0x55);
+        assert(cpu->GetRegisterA() == 0x55);
         cout << "Test passed: " << test_cnt++ << endl;
     }
 }
