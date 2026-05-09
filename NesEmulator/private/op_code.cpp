@@ -260,6 +260,9 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0x6E, "ROR", 3, 6, Absolute, &ror),
         OpCode(0x7E, "ROR", 3, 7, Absolute_X, &ror),
 
+        // RTI - Return from Interrupt
+        OpCode(0x40, "RTI", 1, 6, Implied, &rti),
+
 
     };
     return cpu_ops_code;
@@ -533,6 +536,24 @@ bool OpCode::ror(CPU& cpu, AddressingMode mode)
         cpu.SetFlag(CPU::ZERO_FLAG, result == 0);
         cpu.SetFlag(CPU::NEGATIVE_FLAG, result & CPU::NEGATIVE_FLAG);
     }
+
+    return true;
+}
+
+bool OpCode::rti(CPU& cpu, AddressingMode mode)
+{
+    // 1. 弹出状态寄存器
+    cpu.stack_pointer++;
+    cpu.status = cpu.mem_read(cpu.stack_pointer + 0x0100);
+    cpu.status &= ~(CPU::BREAK_FLAG | CPU::UNUSED_FLAG);
+
+    // 2. 弹出PC
+    cpu.stack_pointer++;
+    byte pc_low = cpu.mem_read(cpu.stack_pointer + 0x0100);
+    cpu.stack_pointer++;
+    byte pc_high = cpu.mem_read(cpu.stack_pointer + 0x0100);
+    word pc = (pc_high << 8) | pc_low;
+    cpu.program_counter = pc;
 
     return true;
 }

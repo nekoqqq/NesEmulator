@@ -43,6 +43,7 @@ void test_pla();
 void test_plp();
 void test_rol();
 void test_ror();
+void test_rti();
 
 int main()
 {
@@ -88,4 +89,5 @@ int main()
     test_plp();
     test_rol();
     test_ror();
+    test_rti();
 }
