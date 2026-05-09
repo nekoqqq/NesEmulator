@@ -13,6 +13,7 @@ void test_bmi();
 void test_bne();
 void test_bpl();
 void test_brk();
+void test_bvc();
 
 int main()
 {
@@ -27,4 +28,5 @@ int main()
     test_bne();
     test_bpl();
     test_brk();
+    test_bvc();
 }

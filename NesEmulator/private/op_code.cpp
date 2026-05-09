@@ -145,8 +145,11 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0xD0, "BPL", 2, 2, NoneAddressing, &bpl), // +1 if branch succeeds +2 if to a new page
 
         // BIT - Bit Test
-        OpCode(0x24, "BIT", 2, 3, ZeroPage, &bit), // +1 if branch succeeds +2 if to a new page
-        OpCode(0x2C, "BIT", 3, 4, Absolute, &bit), // +1 if branch succeeds +2 if to a new page
+        OpCode(0x24, "BIT", 2, 3, ZeroPage, &bit),
+        OpCode(0x2C, "BIT", 3, 4, Absolute, &bit),
+
+        // BVC - Branch if Overflow Clear
+        OpCode(0x24, "BVC", 2, 2, Relative, &bvc), // +1 if branch succeeds +2 if to a new page
 
     };
     return cpu_ops_code;
@@ -221,7 +224,7 @@ bool OpCode::brk(CPU& cpu, AddressingMode mode)
     word int_vector = cpu.mem_read(0xFFFF) << 8 | cpu.mem_read(0xFFFE);
     cpu.program_counter = int_vector;
 
-    return true; 
+    return true;
 }
 
 bool OpCode::lda(CPU& cpu, AddressingMode mode)
@@ -438,7 +441,7 @@ bool OpCode::bmi(CPU& cpu, AddressingMode mode)
 bool OpCode::bvc(CPU& cpu, AddressingMode mode)
 {
     int8_t jump = cpu.mem_read(cpu.program_counter++);
-    if ((cpu.status & 1 << 6) == 0)
+    if ((cpu.status & CPU::OVERFLOW_FLAG) == 0)
     {
         word jump_addr = cpu.program_counter + jump;
         cpu.program_counter = jump_addr;
@@ -449,7 +452,7 @@ bool OpCode::bvc(CPU& cpu, AddressingMode mode)
 bool OpCode::bvs(CPU& cpu, AddressingMode mode)
 {
     int8_t jump = cpu.mem_read(cpu.program_counter++);
-    if ((cpu.status & 1 << 6) == 1)
+    if ((cpu.status & CPU::OVERFLOW_FLAG) == 1)
     {
         word jump_addr = cpu.program_counter + jump;
         cpu.program_counter = jump_addr;
