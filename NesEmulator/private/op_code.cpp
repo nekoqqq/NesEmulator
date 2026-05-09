@@ -253,6 +253,13 @@ vector<OpCode> OpCode::CPU_OPS_CODES = []()
         OpCode(0x2E, "ROL", 3, 6, Absolute, &rol),
         OpCode(0x3E, "ROL", 3, 7, Absolute_X, &rol),
 
+        // ROR - Rotate Right
+        OpCode(0x6A, "ROR", 1, 2, Accumulator, &ror),
+        OpCode(0x66, "ROR", 2, 5, ZeroPage, &ror),
+        OpCode(0x76, "ROR", 2, 6, ZeroPage_X, &ror),
+        OpCode(0x6E, "ROR", 3, 6, Absolute, &ror),
+        OpCode(0x7E, "ROR", 3, 7, Absolute_X, &ror),
+
 
     };
     return cpu_ops_code;
@@ -526,7 +533,7 @@ bool OpCode::ror(CPU& cpu, AddressingMode mode)
         cpu.SetFlag(CPU::ZERO_FLAG, result == 0);
         cpu.SetFlag(CPU::NEGATIVE_FLAG, result & CPU::NEGATIVE_FLAG);
     }
-    
+
     return true;
 }
 
