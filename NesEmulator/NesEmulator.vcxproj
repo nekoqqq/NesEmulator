@@ -339,6 +339,7 @@
   <ItemGroup>
     <ClInclude Include="public\cpu.h" />
     <ClInclude Include="public\op_code.h" />
+    <ClInclude Include="public\snake\snake.h" />
     <ClInclude Include="public\test_runner.h" />
   </ItemGroup>
   <ItemGroup>

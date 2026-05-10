@@ -1,5 +1,6 @@
 ﻿#include "../public/cpu.h"
 #include "../public/op_code.h"
+#include "../public/snake/snake.h"
 
 
 CPU::CPU(byte program_counter, byte stack_pointer, byte register_a, byte register_x, byte register_y, byte status) : program_counter(program_counter),
@@ -8,18 +9,24 @@ CPU::CPU(byte program_counter, byte stack_pointer, byte register_a, byte registe
 {
 }
 
-void CPU::load_and_run(vector<byte>& program, word memory_start)
+void CPU::load_and_run_snake()
+{
+    vector<byte> prog(SNAKE_GAME_CODE.begin(), SNAKE_GAME_CODE.end());
+    load_and_run(prog, SNAKE_ROM_START);
+}
+
+void CPU::load_and_run(const vector<byte>& program, word memory_start, const std::function<void()>& pre_callback)
 {
     load(program, memory_start);
     reset();
-    run();
+    run(pre_callback);
 }
 
-void CPU::load_and_run_no_reset(program& prog, word memory_start)
+void CPU::load_and_run_no_reset(const program& prog, word memory_start, const std::function<void()>& pre_callback)
 {
     load(prog, memory_start);
     program_counter = mem_read_word(0xFFFC);
-    run();
+    run(pre_callback);
 }
 
 byte CPU::mem_read(word addr) const
@@ -107,7 +114,7 @@ bool CPU::interpret()
     return true;
 }
 
-void CPU::load(vector<byte>& program, word memory_start)
+void CPU::load(const program& program, word memory_start)
 {
     // 从32 KB处开始加载程序,程序计数器也设置为此,ROM加载到此内存里面，并不代表实际就从0x8000开始执行了
     memcpy(memory + memory_start, program.data(), program.size() * sizeof(byte));
@@ -126,10 +133,12 @@ void CPU::reset()
     program_counter = mem_read_word(0xFFFC);
 }
 
-void CPU::run()
+void CPU::run(const std::function<void()>& pre_callback)
 {
     while (true)
     {
+        if (pre_callback)
+            pre_callback();
         if (!interpret())
             break;
     }

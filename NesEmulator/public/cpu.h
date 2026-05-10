@@ -5,9 +5,9 @@
  */
 #pragma once
 
+#include <functional>
 #include<iostream>
 #include<vector>
-#include<unordered_map>
 #include "platform_common.h"
 
 using std::vector;
@@ -20,10 +20,12 @@ class CPU
 public:
     CPU(byte program_counter = 0, byte stack_pointer = 0, byte register_a = 0, byte register_x = 0, byte register_y = 0, byte status = 0);
 
+    // 读取贪吃蛇游戏
+    void load_and_run_snake();
     // 加载ROM并运行程序
-    void load_and_run(program& prog, word memory_start = ROM_START);
+    void load_and_run(const program& prog, word memory_start = ROM_START, const std::function<void()>& pre_callback = nullptr); 
     // 不清空直接运行
-    void load_and_run_no_reset(program& prog, word memory_start = ROM_START);
+    void load_and_run_no_reset(const program& prog, word memory_start = ROM_START, const std::function<void()>& pre_callback = nullptr);
 
     /*
      *内存读取相关
@@ -55,11 +57,11 @@ protected:
 private:
     bool interpret(); // 单步执行指令
     // 将ROM加载到内存中
-    void load(program& prog, word memory_start);
+    void load(const program& prog, word memory_start);
     // 重置寄存器的状态，将program_counter的值设置为在内存0xFFFC处存储的2个字节的值
     void reset();
     // 运行内存中的程序
-    void run();
+    void run(const std::function<void()>& pre_callback);
     // 通用的设置寄存器的函数
     void update_zero_and_negative_flags(byte res);
     word get_operand_address(AddressingMode& mode) const;
