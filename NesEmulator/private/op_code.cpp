@@ -353,18 +353,18 @@ bool OpCode::brk(CPU& cpu, AddressingMode mode)
 
     // 1. 存下调指令地址到栈中
     // 下一条指令地址高字节
-    cpu.mem_write(cpu.stack_pointer + 0x0100, (next_pc >> 8) & BYTE_MAX);
+    cpu.mem_write(cpu.stack_pointer + PAGE_ONE, (next_pc >> 8) & BYTE_MAX);
     cpu.stack_pointer--;
 
     // 下一条指令地址低字节
-    cpu.mem_write(cpu.stack_pointer + 0x0100, next_pc & BYTE_MAX);
+    cpu.mem_write(cpu.stack_pointer + PAGE_ONE, next_pc & BYTE_MAX);
     cpu.stack_pointer--;
 
     // 2. 设置中断标志
     cpu.set_flag(CPU::BREAK_FLAG, true);
 
     // 3. CPU状态压栈
-    cpu.mem_write(cpu.stack_pointer + 0x0100, cpu.status);
+    cpu.mem_write(cpu.stack_pointer + PAGE_ONE, cpu.status);
     cpu.stack_pointer--;
 
     // 4. 设置中断禁用标志I（表示正在中断中）
@@ -471,9 +471,9 @@ bool OpCode::jsr(CPU& cpu, AddressingMode mode)
     word addr = cpu.get_operand_address(mode);
     word return_addr = cpu.program_counter + 2;
 
-    cpu.mem_write(cpu.stack_pointer + 0x0100, (return_addr >> 8) & 0xFF);
+    cpu.mem_write(cpu.stack_pointer + PAGE_ONE, (return_addr >> 8) & 0xFF);
     cpu.stack_pointer--;
-    cpu.mem_write(0x0100 + cpu.stack_pointer, return_addr & 0xFF);
+    cpu.mem_write(PAGE_ONE + cpu.stack_pointer, return_addr & 0xFF);
     cpu.stack_pointer--;
     cpu.program_counter = addr;
 
@@ -524,7 +524,7 @@ bool OpCode::lsr(CPU& cpu, AddressingMode mode)
 
 bool OpCode::pha(CPU& cpu, AddressingMode mode)
 {
-    cpu.mem_write(cpu.stack_pointer + 0x0100, cpu.register_a);
+    cpu.mem_write(cpu.stack_pointer + PAGE_ONE, cpu.register_a);
     cpu.stack_pointer--;
 
     return true;
@@ -537,7 +537,7 @@ bool OpCode::php(CPU& cpu, AddressingMode mode)
      *压入栈中的状态字节的第 4 位（B 标志）总是被设置为 1，
      *而当前 CPU 的状态寄存器中的该位实际上是不存在的（或者说是无意义的，通常为 0）
      */
-    cpu.mem_write(cpu.stack_pointer + 0x0100, cpu.status | CPU::BREAK_FLAG);
+    cpu.mem_write(cpu.stack_pointer + PAGE_ONE, cpu.status | CPU::BREAK_FLAG);
     cpu.stack_pointer--;
 
     return true;
@@ -546,7 +546,7 @@ bool OpCode::php(CPU& cpu, AddressingMode mode)
 bool OpCode::pla(CPU& cpu, AddressingMode mode)
 {
     cpu.stack_pointer++;
-    cpu.register_a = cpu.mem_read(cpu.stack_pointer + 0x0100);
+    cpu.register_a = cpu.mem_read(cpu.stack_pointer + PAGE_ONE);
     cpu.set_flag(CPU::ZERO_FLAG, cpu.register_a == 0);
     cpu.set_flag(CPU::NEGATIVE_FLAG, cpu.register_a & CPU::NEGATIVE_FLAG);
 
@@ -556,7 +556,7 @@ bool OpCode::pla(CPU& cpu, AddressingMode mode)
 bool OpCode::plp(CPU& cpu, AddressingMode mode)
 {
     cpu.stack_pointer++;
-    cpu.status = cpu.mem_read(cpu.stack_pointer + 0x0100);
+    cpu.status = cpu.mem_read(cpu.stack_pointer + PAGE_ONE);
     cpu.set_flag(CPU::BREAK_FLAG | CPU::UNUSED_FLAG, false); // 清除 bit4 和 bit5
 
     return true;
@@ -624,14 +624,14 @@ bool OpCode::rti(CPU& cpu, AddressingMode mode)
 {
     // 1. 弹出状态寄存器
     cpu.stack_pointer++;
-    cpu.status = cpu.mem_read(cpu.stack_pointer + 0x0100);
+    cpu.status = cpu.mem_read(cpu.stack_pointer + PAGE_ONE);
     cpu.status &= ~(CPU::BREAK_FLAG | CPU::UNUSED_FLAG);
 
     // 2. 弹出PC
     cpu.stack_pointer++;
-    byte pc_low = cpu.mem_read(cpu.stack_pointer + 0x0100);
+    byte pc_low = cpu.mem_read(cpu.stack_pointer + PAGE_ONE);
     cpu.stack_pointer++;
-    byte pc_high = cpu.mem_read(cpu.stack_pointer + 0x0100);
+    byte pc_high = cpu.mem_read(cpu.stack_pointer + PAGE_ONE);
     word pc = (pc_high << 8) | pc_low;
     cpu.program_counter = pc;
 
@@ -641,10 +641,10 @@ bool OpCode::rti(CPU& cpu, AddressingMode mode)
 bool OpCode::rts(CPU& cpu, AddressingMode mode)
 {
     cpu.stack_pointer++;
-    byte pc_low = cpu.mem_read(cpu.stack_pointer + 0x0100);
+    byte pc_low = cpu.mem_read(cpu.stack_pointer + PAGE_ONE);
 
     cpu.stack_pointer++;
-    byte pc_high = cpu.mem_read(cpu.stack_pointer + 0x0100);
+    byte pc_high = cpu.mem_read(cpu.stack_pointer + PAGE_ONE);
 
     word pc = (pc_high << 8) | pc_low;
     cpu.program_counter = pc + 1;
