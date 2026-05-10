@@ -17,7 +17,7 @@ TEST_LIST
 #undef X
 
 
-bool run_all_tests()
+bool test_op_codes()
 {
     std::vector<std::pair<const char*, std::function<void()>>> tests = {
 #define X(func) {#func, test_##func},

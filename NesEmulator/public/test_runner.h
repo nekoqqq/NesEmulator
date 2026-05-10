@@ -1,1 +1,1 @@
-﻿bool run_all_tests();
+﻿bool test_op_codes();
