@@ -28,5 +28,6 @@ enum AddressingMode:byte
 
 constexpr byte BYTE_MAX = 0xFF;
 constexpr word PAGE_ONE = 0x0100; // 栈位于第一页
+constexpr word ROM_START = 0x8000; // 位于第128页
 
 const int MEM_SIZE = 0x10000; // 6502CPU是16位的CPU，最多可以使用2**16 次方，寻址用2个字节，最多65536字节，也就是64 KB内存

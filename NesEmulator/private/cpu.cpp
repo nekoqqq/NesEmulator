@@ -8,16 +8,16 @@ CPU::CPU(byte program_counter, byte stack_pointer, byte register_a, byte registe
 {
 }
 
-void CPU::load_and_run(vector<byte>& program)
+void CPU::load_and_run(vector<byte>& program, word memory_start)
 {
-    load(program);
+    load(program, memory_start);
     reset();
     run();
 }
 
-void CPU::load_and_run_no_reset(program& prog)
+void CPU::load_and_run_no_reset(program& prog, word memory_start)
 {
-    load(prog);
+    load(prog, memory_start);
     program_counter = mem_read_word(0xFFFC);
     run();
 }
@@ -107,14 +107,14 @@ bool CPU::interpret()
     return true;
 }
 
-void CPU::load(vector<byte>& program)
+void CPU::load(vector<byte>& program, word memory_start)
 {
     // 从32 KB处开始加载程序,程序计数器也设置为此,ROM加载到此内存里面，并不代表实际就从0x8000开始执行了
-    memcpy(memory + 0x8000, program.data(), program.size() * sizeof(byte));
+    memcpy(memory + memory_start, program.data(), program.size() * sizeof(byte));
 
     // 在NES插入卡带后，会重置程序状态，并将程序计数器的位置设置为存储在0xFFFC处的值,[X,X,X,X] 也就是最后4个字节
     // 将0xFFFC处存储的值设置为0x8000;
-    mem_write_word(0xFFFC, 0x8000);
+    mem_write_word(0xFFFC, memory_start);
 }
 
 void CPU::reset()
@@ -210,7 +210,7 @@ word CPU::get_operand_address(AddressingMode& mode) const
     case AddressingMode::Indirect:
         {
             word base = mem_read_word(program_counter);
-            address = mem_read(base) | (mem_read(base+1) <<8);
+            address = mem_read(base) | (mem_read(base + 1) << 8);
         }
         break;
 

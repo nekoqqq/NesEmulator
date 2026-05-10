@@ -21,9 +21,10 @@ public:
     CPU(byte program_counter = 0, byte stack_pointer = 0, byte register_a = 0, byte register_x = 0, byte register_y = 0, byte status = 0);
 
     // 加载ROM并运行程序
-    void load_and_run(program& prog);
+    void load_and_run(program& prog, word memory_start = ROM_START);
     // 不清空直接运行
-    void load_and_run_no_reset(program& prog);
+    void load_and_run_no_reset(program& prog, word memory_start = ROM_START);
+
     /*
      *内存读取相关
      */
@@ -54,7 +55,7 @@ protected:
 private:
     bool interpret(); // 单步执行指令
     // 将ROM加载到内存中
-    void load(program& prog);
+    void load(program& prog, word memory_start);
     // 重置寄存器的状态，将program_counter的值设置为在内存0xFFFC处存储的2个字节的值
     void reset();
     // 运行内存中的程序
